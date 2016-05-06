@@ -10,7 +10,7 @@ var twitter = new Twit({
 
 var stream = twitter.stream('statuses/filter', {
   track: process.env.TWITTER_STREAMING_TRACK_KEYWORDS,
-  language: TWITTER_STREAMING_LANGUAGE
+  language: process.env.TWITTER_STREAMING_LANGUAGE
 });// stream
 
 stream.on('tweet', function (tweet) {
