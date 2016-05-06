@@ -8,7 +8,7 @@ var twitter = new Twit({
   timeout_ms:           60*1000,  // optional HTTP request timeout to apply to all requests.
 });//twitter
 
-var stream = T.stream('statuses/filter', {
+var stream = twitter.stream('statuses/filter', {
   track: process.env.TWITTER_STREAMING_TRACK_KEYWORDS,
   language: TWITTER_STREAMING_LANGUAGE
 });// stream
@@ -20,8 +20,8 @@ stream.on('tweet', function (tweet) {
 
 stream.on('disconnect', function (disconnectMessage) {
   console.error(disconnectMessage);
-});// stream.on('disconnect')
 
+});// stream.on('disconnect')
 stream.on('error', function (error) {
   console.error(error);
 });// stream.on('error')
