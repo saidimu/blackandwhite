@@ -1,0 +1,15 @@
+{
+  "name": "urlstream",
+  "version": "0.0.1",
+  "description": "stream urls from twitter",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "said apale <saidimu@gmail.com>",
+  "license": "ISC",
+  "dependencies": {
+    "nsqjs": "^0.7.12",
+    "twit": "^2.2.4"
+  }
+}
