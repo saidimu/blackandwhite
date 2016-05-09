@@ -21,8 +21,8 @@ writer.on('ready', function () {
 
   stream.on('tweet', function (tweet) {
     // console.log(tweet.text);
-    console.log(tweet.entities.urls[0].expanded_url);
-    writer.publish(process.env.TWEET_URL_NSQ_TOPIC, tweet.entities.urls[0].expanded_url);
+    // console.log(tweet.entities.urls[0].expanded_url);
+    writer.publish(process.env.TWEET_URL_NSQ_TOPIC, tweet.entities.urls[0].expanded_url, console.error);
   });// stream.on('tweet')
 
   stream.on('disconnect', function (disconnectMessage) {
@@ -33,6 +33,10 @@ writer.on('ready', function () {
     console.error(error);
   });// stream.on('error')
 });// writer.on('ready')
+
+writer.on('error', function (err) {
+  console.error(err);
+});// writer.on('error')
 
 writer.on('closed', function () {
   console.warn('Writer closed');
