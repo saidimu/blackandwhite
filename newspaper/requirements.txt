@@ -1,0 +1,2 @@
+newspaper3k==0.1.7
+pynsq==0.6.9
