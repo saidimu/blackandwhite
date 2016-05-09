@@ -21,8 +21,12 @@ writer.on('ready', function () {
 
   stream.on('tweet', function (tweet) {
     // console.log(tweet.text);
-    // console.log(tweet.entities.urls[0].expanded_url);
-    writer.publish(process.env.TWEET_URL_NSQ_TOPIC, tweet.entities.urls[0].expanded_url, console.error);
+    console.log(tweet.entities.urls[0].expanded_url);
+    writer.publish(process.env.TWEET_URL_NSQ_TOPIC, tweet.entities.urls[0].expanded_url, function(err)  {
+      if(err) {
+        console.error(err);
+      }//if
+    });// writer.publish
   });// stream.on('tweet')
 
   stream.on('disconnect', function (disconnectMessage) {
