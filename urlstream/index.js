@@ -40,6 +40,7 @@ writer.on('ready', function () {
 
 writer.on('error', function (err) {
   console.error(err);
+  process.exit(1);  // exit with an error so Docker can handle restarts
 });// writer.on('error')
 
 writer.on('closed', function () {
