@@ -5,6 +5,7 @@ MAINTAINER Said Apale (saidimu@gmail.com)
 
 RUN apk add --no-cache \
   python \
+  py-pip \
   build-base \
   gcc \
   bash \
@@ -26,11 +27,9 @@ RUN mkdir -p /usr/src/app
 WORKDIR /usr/src/app
 
 COPY requirements.txt /usr/src/app/
-RUN \
-  pip3 install --no-cache-dir newspaper3k==0.1.7 && \
-  pip2 install --no-cache-dir pynsq==0.6.9
+RUN pip3 install --no-cache-dir -r requirements.txt && \
+    python3 -m nltk.downloader brown punkt maxent_treebank_pos_tagger movie_reviews wordnet stopwords averaged_perceptron_tagger
 
 COPY . /usr/src/app
 
-# Download corpora
-RUN python3 -m nltk.downloader brown punkt maxent_treebank_pos_tagger movie_reviews wordnet stopwords averaged_perceptron_tagger
+CMD "hug -f api.py"
