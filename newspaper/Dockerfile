@@ -31,5 +31,5 @@ RUN pip3 install --no-cache-dir -r requirements.txt && \
     python3 -m nltk.downloader brown punkt maxent_treebank_pos_tagger movie_reviews wordnet stopwords averaged_perceptron_tagger
 
 COPY . /usr/src/app
-
-CMD "hug -f api.py"
+EXPOSE 8000
+CMD hug -f api.py
