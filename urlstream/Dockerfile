@@ -1,2 +1,2 @@
-FROM node:5.11-onbuild
+FROM node:6.1.0-onbuild
 MAINTAINER Said Apale (saidimu@gmail.com)
