@@ -32,10 +32,12 @@ writer.on('ready', function () {
 
   stream.on('disconnect', function (disconnectMessage) {
     console.error(disconnectMessage);
+    process.exit(1);  // exit with an error so Docker can handle restarts
   });// stream.on('disconnect')
 
   stream.on('error', function (error) {
     console.error(error);
+    process.exit(1);  // exit with an error so Docker can handle restarts
   });// stream.on('error')
 });// writer.on('ready')
 
@@ -46,4 +48,5 @@ writer.on('error', function (err) {
 
 writer.on('closed', function () {
   console.warn('Writer closed');
+  process.exit(1);  // exit with an error so Docker can handle restarts
 });// writer.on('closed')
