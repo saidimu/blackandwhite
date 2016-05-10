@@ -1,3 +1,4 @@
+var fetch = require('node-fetch');
 
 const host = `${process.env.NEWSPAPER_PORT_8000_TCP_ADDR}:${NEWSPAPER_PORT_8000_TCP_PORT}`;
 const endpoint = `${host}/top_image`;
