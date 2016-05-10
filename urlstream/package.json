@@ -11,7 +11,6 @@
   "license": "ISC",
   "dependencies": {
     "nsqjs": "^0.7.12",
-    "readability-api": "^0.4.0",
     "twit": "^2.2.4"
   }
 }
