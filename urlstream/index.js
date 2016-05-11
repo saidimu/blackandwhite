@@ -1,9 +1,13 @@
+import "babel-register";
+
+// require("babel-register"); // https://babeljs.io/docs/usage/require/
+
 var nsq = require('nsqjs');
 var Twit = require('twit');
 
 import {
   get_top_image
-} from './analysis';
+} from '../analysis.js';
 
 var twitter = new Twit({
   consumer_key:         process.env.TWITTER_CONSUMER_KEY,
@@ -28,7 +32,7 @@ writer.on('ready', function () {
     console.log(tweet.entities.urls);
 
     get_top_image(tweet.entities.urls);
-    
+
     writer.publish(process.env.TWEET_URL_NSQ_TOPIC, tweet.entities.urls, function(err)  {
       if(err) {
         console.error(err);
