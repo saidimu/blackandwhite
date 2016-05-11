@@ -1,13 +1,9 @@
-import "babel-register";
-
-// require("babel-register"); // https://babeljs.io/docs/usage/require/
-
 var nsq = require('nsqjs');
 var Twit = require('twit');
 
 import {
   get_top_image
-} from '../analysis.js';
+} from './analysis.js';
 
 var twitter = new Twit({
   consumer_key:         process.env.TWITTER_CONSUMER_KEY,
