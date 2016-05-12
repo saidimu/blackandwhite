@@ -50,7 +50,7 @@ export function publish(topic, message, callback) {
   writer.publish(topic, message, callback);// writer.publish
 }// publish
 
-export function subscribe(messsage, discard, error, nsqd_connected, nsqd_closed)  {
+export function subscribe(message, discard, error, nsqd_connected, nsqd_closed)  {
   if(!message)  {
     throw new Error('A "on message" handler was not specified!');
   }//if
