@@ -39,10 +39,10 @@ function on_tweet(tweet) {
 subscribe(on_url, on_discard, null, null, null);
 
 function on_url(message)  {
-  const url = msg.body.toString();
-  console.log('Received message [%s]: %s', msg.id, url);
+  const url = message.body.toString();
+  console.log('Received message [%s]: %s', message.id, url);
   process_url(url);
-  msg.finish();
+  message.finish();
 }// on_url
 
 function process_url(url) {
