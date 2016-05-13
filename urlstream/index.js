@@ -32,16 +32,21 @@ stream_tweets(on_tweet, null, null);
 function on_tweet(tweet) {
   // console.log(tweet.text);
   // console.log(tweet.entities.urls[0].expanded_url);
-  console.log(tweet.entities.urls);
-  publish(process.env.TWITTER_URLS_NSQ_TOPIC, tweet.entities.urls);
+  tweet.entities.urls.forEach((url) => {
+    if(url) {
+      console.log('Publishing message: %s', url);
+      publish(process.env.TWITTER_URLS_NSQ_TOPIC, url);
+    }// if
+  });// forEach
 }// on_tweet
 
 subscribe(on_url, on_discard, null, null, null);
 
 function on_url(message)  {
-  const url = message.body.toString();
+  // const url = message.body.toString();
+  const url = message.json();
   console.log('Received message [%s]: %s', message.id, url);
-  process_url(url);
+  process_url(url.url);
   message.finish();
 }// on_url
 
