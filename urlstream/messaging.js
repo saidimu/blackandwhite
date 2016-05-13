@@ -30,10 +30,12 @@ export function init_writer(ready, error, closed) {
 }// init_writer
 
 export function init_reader(topic, channel) {
+  const host = `${process.env.NSQD_1_PORT_4150_TCP_ADDR}:${process.env.NSQD_1_PORT_4150_TCP_PORT}`;
+  console.log('NSQD host: ', host);
   reader = new nsq.Reader(
     topic,
     channel, {
-      nsqdTCPAddresses: `${process.env.NSQD_1_PORT_4150_TCP_ADDR}:${process.env.NSQD_1_PORT_4150_TCP_PORT}`
+      nsqdTCPAddresses: host,
     }
   );// nsq.Reader
 
