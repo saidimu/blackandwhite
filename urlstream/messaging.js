@@ -3,11 +3,11 @@ var nsq = require('nsqjs');
 let reader;
 let writer;
 
+const nsqd_host = process.env.NSQD_ENV_DOCKERCLOUD_SERVICE_HOSTNAME;
+const nsqd_port = 4150;
+
 export function init_writer(ready, error, closed) {
-  writer = new nsq.Writer(
-    process.env.NSQD_1_PORT_4150_TCP_ADDR,
-    process.env.NSQD_1_PORT_4150_TCP_PORT
-  );// nsq.Writer
+  writer = new nsq.Writer(nsqd_host, nsqd_port);
 
   writer.connect();
 
@@ -30,7 +30,7 @@ export function init_writer(ready, error, closed) {
 }// init_writer
 
 export function init_reader(topic, channel) {
-  const host = `${process.env.NSQD_1_PORT_4150_TCP_ADDR}:${process.env.NSQD_1_PORT_4150_TCP_PORT}`;
+  const host = `${nsqd_host}:${nsqd_port}`;
   console.log('NSQD host: ', host);
   reader = new nsq.Reader(
     topic,
