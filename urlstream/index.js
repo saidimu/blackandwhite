@@ -34,7 +34,7 @@ function on_tweet(tweet) {
   // console.log(tweet.entities.urls[0].expanded_url);
   tweet.entities.urls.forEach((url) => {
     if(url) {
-      console.log('Publishing message: %s', url);
+      console.log('Publishing message: %s', JSON.stringify(url));
       publish(process.env.TWITTER_URLS_NSQ_TOPIC, url);
     }// if
   });// forEach
@@ -45,7 +45,7 @@ subscribe(on_url, on_discard, null, null, null);
 function on_url(message)  {
   // const url = message.body.toString();
   const url = message.json();
-  console.log('Received message [%s]: %s', message.id, url);
+  console.log('Received message [%s]: %s', message.id, JSON.stringify(url));
   process_url(url.url);
   message.finish();
 }// on_url
