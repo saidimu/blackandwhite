@@ -46,7 +46,7 @@ function on_url(message)  {
   // const url = message.body.toString();
   const url = message.json();
   console.log('Received message [%s]: %s', message.id, JSON.stringify(url));
-  process_url(url.url);
+  process_url(url);
   message.finish();
 }// on_url
 
@@ -54,7 +54,7 @@ function process_url(url) {
   const top_image = get_top_image(url);
   publish(process.env.TOPIMAGE_URLS_NSQ_TOPIC, {
     url: url,
-    top_image: url
+    top_image: top_image
   });// publish
 }// process_url
 
