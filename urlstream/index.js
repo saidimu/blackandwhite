@@ -9,7 +9,7 @@ import {
 } from './messaging.js';
 
 import {
-  stream as stream_tweets
+  start as stream_tweets
 } from './twitter.js';
 
 import {
