@@ -52,10 +52,12 @@ function on_url(message)  {
 
 function process_url(url) {
   const top_image = get_top_image(url);
-  publish(process.env.TOPIMAGE_URLS_NSQ_TOPIC, {
-    url: url,
-    top_image: top_image
-  });// publish
+  if(top_image) {
+    publish(process.env.TOPIMAGE_URLS_NSQ_TOPIC, {
+      url: url,
+      top_image: top_image
+    });// publish
+  }// if
 }// process_url
 
 function on_discard(message)  {
