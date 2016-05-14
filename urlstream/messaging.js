@@ -29,19 +29,6 @@ export function init_writer(ready, error, closed) {
   writer.on('closed', closed);
 }// init_writer
 
-export function init_reader(topic, channel) {
-  const host = `${nsqd_host}:${nsqd_port}`;
-  console.log('NSQD host: ', host);
-  reader = new nsq.Reader(
-    topic,
-    channel, {
-      nsqdTCPAddresses: host,
-    }
-  );// nsq.Reader
-
-  reader.connect();
-}// init_reader
-
 export function publish(topic, message, callback) {
   callback = callback || function(err)  {
     if(err) {
@@ -52,7 +39,20 @@ export function publish(topic, message, callback) {
   writer.publish(topic, message, callback);// writer.publish
 }// publish
 
-export function subscribe(message, discard, error, nsqd_connected, nsqd_closed)  {
+export function init_reader(topic, channel, handlers) {
+  const host = `${nsqd_host}:${nsqd_port}`;
+  console.log('NSQD host: ', host);
+  reader = new nsq.Reader(
+    topic,
+    channel, {
+      nsqdTCPAddresses: host,
+    }
+  );// nsq.Reader
+
+  reader.connect();
+
+  const message, discard, error, nsqd_connected, nsqd_closed = handlers;
+
   if(!message)  {
     throw new Error('A "on message" handler was not specified!');
   }//if
@@ -79,4 +79,6 @@ export function subscribe(message, discard, error, nsqd_connected, nsqd_closed) 
     process.exit(1);  // exit with an error so Docker can handle restarts
   };// nsqd_closed
   reader.on('nsqd_closed', nsqd_closed);
-}// subscribe
+
+  return reader;
+}// init_reader

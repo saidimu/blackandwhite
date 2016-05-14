@@ -13,7 +13,7 @@ var stream = twitter.stream('statuses/filter', {
   language: process.env.TWITTER_STREAMING_LANGUAGE
 });// stream
 
-export function start(tweet, disconnect, error) {
+export function get_tweet_stream(tweet, disconnect, error) {
   tweet = tweet || function (tweet) {
     console.log(tweet);
   };// tweet
@@ -33,4 +33,4 @@ export function start(tweet, disconnect, error) {
   };// error
 
   stream.on('error', error);// stream.on('error')
-}// start
+}// get_tweet_stream
