@@ -1,6 +1,3 @@
-// var nsq = require('nsqjs');
-// var Twit = require('twit');
-
 import {
   init_writer,
   init_reader,

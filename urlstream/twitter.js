@@ -15,17 +15,7 @@ var stream = twitter.stream('statuses/filter', {
 
 export function start(tweet, disconnect, error) {
   tweet = tweet || function (tweet) {
-    // console.log(tweet.text);
-    // console.log(tweet.entities.urls[0].expanded_url);
-    console.log(tweet.entities.urls);
-    //
-    // get_top_image(tweet.entities.urls);
-    //
-    // writer.publish(process.env.TWITTER_URLS_NSQ_TOPIC, tweet.entities.urls, function(err)  {
-    //   if(err) {
-    //     console.error(err);
-    //   }//if
-    // });// writer.publish
+    console.log(tweet);
   };// tweet
 
   stream.on('tweet', tweet);// stream.on('tweet')
