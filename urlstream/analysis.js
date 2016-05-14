@@ -77,7 +77,7 @@ export function save_tweets() {
   );// init_reader
 
   function on_tweet(message)  {
-    console.log(message.id);
+    // console.log(message.id);
     const tweet = message.json();
     Tweet.create({
       tweet: tweet
@@ -125,7 +125,13 @@ export function save_urls() {
   );// init_reader
 
   function on_url(message)  {
-    console.log(message.id);
+    const url = message.json();
+    Url.create({
+      url: url
+    }).then(function(url) {
+      console.log('Tweet URL saved!');
+      message.finish();
+    });// Url.create
   }// on_url
 }// save_urls
 
@@ -155,7 +161,13 @@ export function save_top_image() {
   );// init_reader
 
   function on_url(message)  {
-    console.log(message.id);
+    const top_image = message.json();
+    TopImage.create({
+      top_image: top_image
+    }).then(function(top_image) {
+      console.log('TopImage URL saved!');
+      message.finish();
+    });// TopImage.create
   }// on_url
 }// save_top_image
 
