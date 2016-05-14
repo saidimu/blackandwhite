@@ -24,6 +24,6 @@
   "bitwise": true,
   "indent": 4,
   "esnext": true,
-  "browser": true,
+  "browser": false,
   "devel": true
 }

@@ -1,9 +1,10 @@
 import {
   get_tweet_stream
 } from './twitter.js';
+
 import {
   init_writer,
-  publish_message
+  publish
 } from './messaging.js';
 
 import {
@@ -18,7 +19,7 @@ import {
 init_writer();
 
 get_tweet_stream((tweet) => {
-  publish_message(process.env.TWEETS_TOPIC, tweet);
+  publish(process.env.TWEETS_TOPIC, tweet);
 });// get_tweet_stream
 
 process_tweets();

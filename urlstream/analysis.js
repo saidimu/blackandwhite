@@ -3,7 +3,7 @@ var fetch = require('node-fetch');
 import {
   init_writer,
   init_reader,
-  publish_message
+  publish as publish_message
 } from './messaging.js';
 
 init_writer();
