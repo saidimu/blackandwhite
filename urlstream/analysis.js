@@ -79,8 +79,11 @@ export function save_tweets() {
   function on_tweet(message)  {
     console.log(message.id);
     const tweet = message.json();
-    Tweet.ceate({
+    Tweet.create({
       tweet: tweet
+    }).then(function(tweet) {
+      console.log('Tweet saved!');
+      message.finish();
     });// Tweet.create
   }// on_tweet
 }// save_tweets
