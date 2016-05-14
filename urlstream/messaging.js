@@ -51,7 +51,7 @@ export function init_reader(topic, channel, handlers) {
 
   reader.connect();
 
-  const message, discard, error, nsqd_connected, nsqd_closed = handlers;
+  let { message, discard, error, nsqd_connected, nsqd_closed } = handlers;
 
   if(!message)  {
     throw new Error('A "on message" handler was not specified!');
