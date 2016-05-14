@@ -12,26 +12,26 @@ var sequelize = new Sequelize(
   }
 );// sequelize
 
-var Tweet = sequelize.define('tweet', {
+export var Tweet = sequelize.define('tweet', {
   // id: { type: Sequelize.INTEGER, autoIncrement: true, primaryKey: true },
   tweet: { type: Sequelize.JSONB }
 });// User
 
-var Url = sequelize.define('url', {
+export var Url = sequelize.define('url', {
   url: { type: Sequelize.TEXT }
 });// Url
 
-var TopImage = sequelize.define('topimage', {
+export var TopImage = sequelize.define('topimage', {
   top_image: { type: Sequelize.TEXT }
 });// TopImage
 
-Tweet.hasMany(Url, {as: 'urls'});
-Url.hasMany(Tweet, {as: 'tweets'});
-Url.hasOne(TopImage);
-TopImage.belongsTo(Url);
+Tweet.belongsToMany(Url, {through: 'TweetUrls'});
+Url.belongsToMany(Tweet, {through: 'TweetUrls'});
+Url.belongsTo(TopImage);
+TopImage.belongsToMany(Url, {through: 'TopImageUrls'});
 
 sequelize.sync().then(function() {
-  module.exports = { Tweet, Url, TopImage };
+  console.log('Sequelize SYNC all good.');
 }).catch(function(error) {
   console.error(error);
 });// sequelize.sync
