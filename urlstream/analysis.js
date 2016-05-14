@@ -6,6 +6,13 @@ import {
   publish as publish_message
 } from './messaging.js';
 
+
+import {
+  Tweet,
+  Url,
+  TopImage
+} from './datastore.js';
+
 init_writer();
 
 const host = process.env.NEWSPAPER_PORT_8000_TCP_ADDR;
@@ -71,6 +78,10 @@ export function save_tweets() {
 
   function on_tweet(message)  {
     console.log(message.id);
+    const tweet = message.json();
+    Tweet.ceate({
+      tweet: tweet
+    });// Tweet.create
   }// on_tweet
 }// save_tweets
 
