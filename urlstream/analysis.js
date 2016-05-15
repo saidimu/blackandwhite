@@ -25,7 +25,7 @@ function get_top_image(url_object)  {
   try {
     const url = url_object.url; // FIXME TODO HACK
     if(url) {
-      fetch(`${endpoint}?url=${url}`)
+      return fetch(`${endpoint}?url=${url}`)
         .then(function(response)  {
           return response.text();
         }).then(function(body)  {
@@ -80,7 +80,7 @@ export function save_tweets() {
   function on_tweet(message)  {
     // console.log(message.id);
     const tweet = message.json();
-    const x = Tweet.create({
+    return Tweet.create({
       tweet: tweet
     }).then(function(tweet) {
       console.log('Tweet saved!');
@@ -106,19 +106,24 @@ export function process_urls() {
     const url_object = message.json();
     // console.log('Received message [%s]: %s', message.id, JSON.stringify(url));
 
-    const top_image = get_top_image(url_object);
-    console.log(top_image);
-    if(top_image) {
-      const top_image_message = {
-        url_object: url_object,
-        top_image: top_image
-      };// top_image_message
-      console.log('Publishing message: %s', JSON.stringify(top_image_message));
-      publish_message(process.env.TOPIMAGE_TOPIC, top_image_message);
-      message.finish();
-    } else {
-      message.requeue(null, false);
-    }// if-else
+    get_top_image(url_object)
+      .then(function(top_image)  {
+        console.log(top_image);
+        if(top_image) {
+          const top_image_message = {
+            url_object: url_object,
+            top_image: top_image
+          };// top_image_message
+          console.log('Publishing message: %s', JSON.stringify(top_image_message));
+          publish_message(process.env.TOPIMAGE_TOPIC, top_image_message);
+          message.finish();
+        } else {
+          message.requeue(null, false);
+        }// if-else
+      }).catch(function(err)  {
+        console.error(err);
+        message.requeue(null, false);
+      });// get_top_image
   }// on_url
 }// process_urls
 
@@ -134,7 +139,7 @@ export function save_urls() {
 
   function on_url(message)  {
     const url_object = message.json();
-    const x = Urls.create({
+    return Urls.create({
       urls: url_object
     }).then(function(url_object) {
       console.log('Tweet URL object saved!');
@@ -173,7 +178,7 @@ export function save_top_image() {
 
   function on_top_image(message)  {
     const top_image = message.json().top_image;
-    const x = TopImage.create({
+    return TopImage.create({
       top_image: top_image
     }).then(function(top_image) {
       console.log('TopImage URL saved!');
