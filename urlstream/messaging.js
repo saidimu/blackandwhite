@@ -45,7 +45,9 @@ export function init_reader(topic, channel, handlers) {
   reader = new nsq.Reader(
     topic,
     channel, {
+      // https://github.com/dudleycarr/nsqjs#new-readertopic-channel-options
       nsqdTCPAddresses: host,
+      maxAttempts: 0
     }
   );// nsq.Reader
 
