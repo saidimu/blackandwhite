@@ -80,7 +80,7 @@ export function save_tweets() {
   function on_tweet(message)  {
     // console.log(message.id);
     const tweet = message.json();
-    return Tweet.create({
+    const x = Tweet.create({
       tweet: tweet
     }).then(function(tweet) {
       console.log('Tweet saved!');
@@ -134,7 +134,7 @@ export function save_urls() {
 
   function on_url(message)  {
     const url_object = message.json();
-    return Urls.create({
+    const x = Urls.create({
       urls: url_object
     }).then(function(url_object) {
       console.log('Tweet URL object saved!');
@@ -173,7 +173,7 @@ export function save_top_image() {
 
   function on_top_image(message)  {
     const top_image = message.json().top_image;
-    return TopImage.create({
+    const x = TopImage.create({
       top_image: top_image
     }).then(function(top_image) {
       console.log('TopImage URL saved!');

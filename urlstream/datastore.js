@@ -9,7 +9,7 @@ var sequelize = new Sequelize(
     define: {
       timestamps: true // true by default
     },
-    logging: false
+    logging: console.log
   }
 );// sequelize
 
