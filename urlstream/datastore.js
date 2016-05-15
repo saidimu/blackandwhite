@@ -25,10 +25,10 @@ export var TopImage = sequelize.define('topimage', {
   top_image: { type: Sequelize.TEXT }
 });// TopImage
 
-Tweet.belongsToMany(Urls, {through: 'TweetUrls'});
-Urls.belongsToMany(Tweet, {through: 'TweetUrls'});
+Tweet.belongsToMany(Urls, {through: 'tweet_urls'});
+Urls.belongsToMany(Tweet, {through: 'tweet_urls'});
 Urls.belongsTo(TopImage);
-TopImage.belongsToMany(Urls, {through: 'TopImageUrls'});
+TopImage.belongsToMany(Urls, {through: 'top_image_urls'});
 
 sequelize.sync().then(function() {
   console.log('Sequelize SYNC all good.');
