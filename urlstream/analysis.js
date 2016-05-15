@@ -9,7 +9,7 @@ import {
 
 import {
   Tweet,
-  Url,
+  Urls,
   TopImage
 } from './datastore.js';
 
@@ -129,7 +129,7 @@ export function save_urls() {
 
   function on_url(message)  {
     const url = message.json();
-    return Url.create({
+    return Urls.create({
       url: url
     }).then(function(url) {
       console.log('Tweet URL saved!');
@@ -137,7 +137,7 @@ export function save_urls() {
     }).catch(function(err)  {
       console.error(err);
       message.requeue(null, false); // https://github.com/dudleycarr/nsqjs#new-readertopic-channel-options
-    });// Url.create
+    });// Urls.create
   }// on_url
 }// save_urls
 
