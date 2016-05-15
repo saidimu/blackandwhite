@@ -79,11 +79,14 @@ export function save_tweets() {
   function on_tweet(message)  {
     // console.log(message.id);
     const tweet = message.json();
-    Tweet.create({
+    return Tweet.create({
       tweet: tweet
     }).then(function(tweet) {
       console.log('Tweet saved!');
       message.finish();
+    }).catch(function(err)  {
+      console.error(err);
+      message.requeue(null, false); // https://github.com/dudleycarr/nsqjs#new-readertopic-channel-options
     });// Tweet.create
   }// on_tweet
 }// save_tweets
@@ -126,11 +129,14 @@ export function save_urls() {
 
   function on_url(message)  {
     const url = message.json();
-    Url.create({
+    return Url.create({
       url: url
     }).then(function(url) {
       console.log('Tweet URL saved!');
       message.finish();
+    }).catch(function(err)  {
+      console.error(err);
+      message.requeue(null, false); // https://github.com/dudleycarr/nsqjs#new-readertopic-channel-options
     });// Url.create
   }// on_url
 }// save_urls
@@ -162,16 +168,20 @@ export function save_top_image() {
 
   function on_url(message)  {
     const top_image = message.json();
-    TopImage.create({
+    return TopImage.create({
       top_image: top_image
     }).then(function(top_image) {
       console.log('TopImage URL saved!');
       message.finish();
+    }).catch(function(err)  {
+      console.error(err);
+      message.requeue(null, false); // https://github.com/dudleycarr/nsqjs#new-readertopic-channel-options
     });// TopImage.create
   }// on_url
 }// save_top_image
 
 function on_discard_message(message)  {
+  // FIXME TODO publish to a 'special' error topic?
   console.error('Received Message DISCARD event.');
   console.error(message);
 }// on_discard_message

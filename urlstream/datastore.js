@@ -7,7 +7,7 @@ var sequelize = new Sequelize(
     host: process.env.DB_ENV_DOCKERCLOUD_SERVICE_HOSTNAME,
     dialect: 'postgres',
     define: {
-      timestamps: false // true by default
+      timestamps: true // true by default
     }
   }
 );// sequelize
@@ -17,18 +17,18 @@ export var Tweet = sequelize.define('tweet', {
   tweet: { type: Sequelize.JSONB }
 });// User
 
-export var Url = sequelize.define('url', {
-  url: { type: Sequelize.TEXT }
+export var Urls = sequelize.define('url', {
+  urls: { type: Sequelize.JSONB }
 });// Url
 
 export var TopImage = sequelize.define('topimage', {
   top_image: { type: Sequelize.TEXT }
 });// TopImage
 
-Tweet.belongsToMany(Url, {through: 'TweetUrls'});
-Url.belongsToMany(Tweet, {through: 'TweetUrls'});
-Url.belongsTo(TopImage);
-TopImage.belongsToMany(Url, {through: 'TopImageUrls'});
+Tweet.belongsToMany(Urls, {through: 'TweetUrls'});
+Urls.belongsToMany(Tweet, {through: 'TweetUrls'});
+Urls.belongsTo(TopImage);
+TopImage.belongsToMany(Urls, {through: 'TopImageUrls'});
 
 sequelize.sync().then(function() {
   console.log('Sequelize SYNC all good.');
