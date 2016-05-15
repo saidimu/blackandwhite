@@ -30,7 +30,7 @@ Urls.belongsToMany(Tweet, {through: 'tweet_urls'});
 Urls.belongsTo(TopImage);
 TopImage.belongsToMany(Urls, {through: 'top_image_urls'});
 
-sequelize.sync().then(function() {
+sequelize.sync({logging: false}).then(function() {
   console.log('Sequelize SYNC all good.');
 }).catch(function(error) {
   console.error(error);
