@@ -8,7 +8,8 @@ var sequelize = new Sequelize(
     dialect: 'postgres',
     define: {
       timestamps: true // true by default
-    }
+    },
+    logging: false
   }
 );// sequelize
 

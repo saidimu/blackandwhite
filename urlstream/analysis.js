@@ -30,7 +30,7 @@ function get_top_image(url_object)  {
           return response.text();
         }).then(function(body)  {
           const top_image = body;
-          console.log(top_image);
+          // console.log(top_image);
           return top_image;
         });// fetch
     } else {
@@ -107,12 +107,14 @@ export function process_urls() {
     // console.log('Received message [%s]: %s', message.id, JSON.stringify(url));
 
     const top_image = get_top_image(url_object);
+    console.log(top_image);
     if(top_image) {
-      publish_message(process.env.TOPIMAGE_TOPIC, {
+      const top_image_message = {
         url_object: url_object,
         top_image: top_image
-      });// publish_message
-
+      };// top_image_message
+      console.log('Publishing message: %s', JSON.stringify(top_image_message));
+      publish_message(process.env.TOPIMAGE_TOPIC, top_image_message);
       message.finish();
     } else {
       message.requeue(null, false);
