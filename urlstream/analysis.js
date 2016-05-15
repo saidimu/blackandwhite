@@ -34,6 +34,7 @@ function get_top_image(url_object)  {
           return top_image;
         });// fetch
     } else {
+      console.error('No valid url foumd in URL object: %s', JSON.stringify(url_object));
       return null;
     }// if-else
   } catch (e) {
@@ -102,18 +103,20 @@ export function process_urls() {
   );// init_reader
 
   function on_url(message)  {
-    const url = message.json();
+    const url_object = message.json();
     // console.log('Received message [%s]: %s', message.id, JSON.stringify(url));
 
-    const top_image = get_top_image(url);
+    const top_image = get_top_image(url_object);
     if(top_image) {
       publish_message(process.env.TOPIMAGE_TOPIC, {
-        url: url,
+        url_object: url_object,
         top_image: top_image
       });// publish_message
-    }// if
 
-    message.finish();
+      message.finish();
+    } else {
+      message.requeue(null, false);
+    }// if-else
   }// on_url
 }// process_urls
 
@@ -128,11 +131,11 @@ export function save_urls() {
   );// init_reader
 
   function on_url(message)  {
-    const urls = message.json();
+    const url_object = message.json();
     return Urls.create({
-      urls: urls
-    }).then(function(url) {
-      console.log('Tweet URL saved!');
+      urls: url_object
+    }).then(function(url_object) {
+      console.log('Tweet URL object saved!');
       message.finish();
     }).catch(function(err)  {
       console.error(err);
