@@ -4,8 +4,12 @@ def url_handler(url=None):
     if not url:
         return False
     ## if
-    article = Article(url)
-    article.download()
-    article.parse()
-    print(article.top_image)
-    return article.top_image
+    try:
+        article = Article(url)
+        article.download()
+        article.parse()
+        return article.top_image
+    except Exception as e:
+        return False
+    ##try-except
+##url_handler
