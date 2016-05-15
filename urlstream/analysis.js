@@ -149,14 +149,14 @@ export function process_top_image() {
     process.env.TOPIMAGE_TOPIC,
     process.env.TOPIMAGE_PROCESS_CHANNEL,
     {
-      message: on_url,
+      message: on_top_image,
       discard: on_discard_message
     }
   );// init_reader
 
-  function on_url(message)  {
+  function on_top_image(message)  {
     console.log(message.id);
-  }// on_url
+  }// on_top_image
 }// process_top_image
 
 export function save_top_image() {
@@ -164,13 +164,13 @@ export function save_top_image() {
     process.env.TOPIMAGE_TOPIC,
     process.env.TOPIMAGE_SAVE_CHANNEL,
     {
-      message: on_url,
+      message: on_top_image,
       discard: on_discard_message
     }
   );// init_reader
 
-  function on_url(message)  {
-    const top_image = message.json();
+  function on_top_image(message)  {
+    const top_image = message.json().top_image;
     return TopImage.create({
       top_image: top_image
     }).then(function(top_image) {
