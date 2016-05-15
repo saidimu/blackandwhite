@@ -14,15 +14,15 @@ var sequelize = new Sequelize(
 
 export var Tweet = sequelize.define('tweet', {
   // id: { type: Sequelize.INTEGER, autoIncrement: true, primaryKey: true },
-  tweet: { type: Sequelize.JSONB }
+  tweet: { type: Sequelize.JSONB, allowNull: false }
 });// User
 
 export var Urls = sequelize.define('url', {
-  urls: { type: Sequelize.JSONB }
+  urls: { type: Sequelize.JSONB, allowNull: false }
 });// Url
 
 export var TopImage = sequelize.define('topimage', {
-  top_image: { type: Sequelize.TEXT }
+  top_image: { type: Sequelize.TEXT, allowNull: false }
 });// TopImage
 
 Tweet.belongsToMany(Urls, {through: 'tweet_urls'});

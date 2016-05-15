@@ -128,9 +128,9 @@ export function save_urls() {
   );// init_reader
 
   function on_url(message)  {
-    const url = message.json();
+    const urls = message.json();
     return Urls.create({
-      url: url
+      urls: urls
     }).then(function(url) {
       console.log('Tweet URL saved!');
       message.finish();
