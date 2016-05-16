@@ -14,11 +14,12 @@ var sequelize = new Sequelize(
 );// sequelize
 
 export var Tweet = sequelize.define('tweet', {
-  // id: { type: Sequelize.INTEGER, autoIncrement: true, primaryKey: true },
+  tweet_id: { type: Sequelize.TEXT, primaryKey: true },
   tweet: { type: Sequelize.JSONB, allowNull: false }
 });// User
 
 export var Urls = sequelize.define('url', {
+  tweet_id: { type: Sequelize.TEXT, primaryKey: true },
   urls: { type: Sequelize.JSONB, allowNull: false }
 });// Url
 
