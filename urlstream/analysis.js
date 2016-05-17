@@ -21,28 +21,6 @@ const port = process.env.NEWSPAPER_PORT_8000_TCP_PORT;
 const endpoint = `http://${host}:${port}/top_image`;
 // const endpoint = `${host}/top_image`;
 
-function get_top_image(url_object)  {
-  try {
-    const url = url_object.url; // FIXME TODO HACK
-    if(url) {
-      return fetch(`${endpoint}?url=${url}`)
-        .then(function(response)  {
-          return response.text();
-        }).then(function(body)  {
-          const top_image = body;
-          // console.log(top_image);
-          return top_image;
-        });// fetch
-    } else {
-      console.error('No valid url foumd in URL object: %s', JSON.stringify(url_object));
-      return null;
-    }// if-else
-  } catch (e) {
-    console.error(e);
-    return null;
-  }// try-catch
-}// get_top_image
-
 export function process_tweets() {
   init_reader(
     process.env.TWEETS_TOPIC,
@@ -55,11 +33,14 @@ export function process_tweets() {
 
   function on_tweet(message)  {
     const tweet = message.json();
-
+    const tweet_id = tweet.id_str;
     tweet.entities.urls.forEach((url) => {
       if(url) {
-        console.log('Publishing message: %s', JSON.stringify(url));
-        publish_message(process.env.TWEET_URLS_TOPIC, url);
+        // console.log('Publishing message: %s', JSON.stringify(url));
+        publish_message(process.env.TWEET_URLS_TOPIC, {
+          tweet_id: tweet_id,
+          url: url
+        });// publish_message
       }// if
     });// forEach
 
@@ -80,7 +61,9 @@ export function save_tweets() {
   function on_tweet(message)  {
     // console.log(message.id);
     const tweet = message.json();
+    const tweet_id = tweet.id_str;
     return Tweet.create({
+      tweet_id: tweet_id,
       tweet: tweet
     }).then(function(tweet) {
       console.log('Tweet saved!');
@@ -104,6 +87,7 @@ export function process_urls() {
 
   function on_url(message)  {
     const url_object = message.json();
+    const tweet_id = url_object.tweet_id;
     // console.log('Received message [%s]: %s', message.id, JSON.stringify(url));
 
     get_top_image(url_object)
@@ -111,7 +95,7 @@ export function process_urls() {
         console.log(top_image);
         if(top_image) {
           const top_image_message = {
-            url_object: url_object,
+            tweet_id: tweet_id,
             top_image: top_image
           };// top_image_message
           console.log('Publishing message: %s', JSON.stringify(top_image_message));
@@ -139,11 +123,40 @@ export function save_urls() {
 
   function on_url(message)  {
     const url_object = message.json();
+    const tweet_id = url_object.tweet_id;
+
     return Urls.create({
+      tweet_id: tweet_id,
       urls: url_object
-    }).then(function(url_object) {
+    }).then(function(urls_object) {
       console.log('Tweet URL object saved!');
-      message.finish();
+
+      // Find a related Tweet object and associate with newly-created Urls object
+      Tweet.findOne({
+        attributes: ['tweet_id'],
+        where: {
+          tweet_id: tweet_id
+        }
+      }).then(function(tweet) {
+        tweet.addUrl(urls_object).then(function() {
+          console.log(
+            'Associated Urls["%s"] with Tweet["%s"]',
+            urls_object.get('tweet_id'), tweet.get('tweet_id')
+          );// console.log
+
+          message.finish();
+
+        }).catch(function(err)  {
+          console.error(err);
+          console.error(
+            'ERROR associating Urls["%s"] with Tweet["%s"]',
+            urls_object.get('tweet_id'), tweet.get('tweet_id')
+          );// console.error
+        });// tweet.addUrl
+      }).catch(function(err)  {
+        console.error(err);
+      });// Tweet.findOne
+
     }).catch(function(err)  {
       console.error(err);
       message.requeue(null, false); // https://github.com/dudleycarr/nsqjs#new-readertopic-channel-options
@@ -177,12 +190,42 @@ export function save_top_image() {
   );// init_reader
 
   function on_top_image(message)  {
-    const top_image = message.json().top_image;
+    const top_image_object = message.json();
+    const tweet_id = top_image_object.tweet_id;
+    const top_image = top_image_object.top_image;
+
     return TopImage.create({
       top_image: top_image
     }).then(function(top_image) {
       console.log('TopImage URL saved!');
-      message.finish();
+
+      // Find a related Urls object and associate with newly-created TopImage object
+      Urls.findOne({
+        attributes: ['tweet_id'],
+        where: {
+          tweet_id: tweet_id
+        }
+      }).then(function(urls_object) {
+        // associate newly-created Urls object with a Tweet object
+        urls_object.setTopimage(top_image).then(function() {
+          console.log(
+            'Associated Urls["%s"] with TopImage["%s"]',
+            urls_object.get('tweet_id'), top_image.get('tweet_id')
+          );// console.log
+
+          message.finish();
+
+        }).catch(function(err)  {
+          console.error(err);
+          console.error(
+            'ERROR associating Urls["%s"] with TopImage["%s"]',
+            urls_object.get('tweet_id'), top_image.get('tweet_id')
+          );// console.error
+        });// url_object.addTopImage
+      }).catch(function(err)  {
+        console.error(err);
+      });// Urls.findOne
+
     }).catch(function(err)  {
       console.error(err);
       message.requeue(null, false); // https://github.com/dudleycarr/nsqjs#new-readertopic-channel-options
@@ -195,3 +238,25 @@ function on_discard_message(message)  {
   console.error('Received Message DISCARD event.');
   console.error(message);
 }// on_discard_message
+
+function get_top_image(url_object)  {
+  try {
+    const url = url_object.url; // FIXME TODO HACK
+    if(url) {
+      return fetch(`${endpoint}?url=${url}`)
+        .then(function(response)  {
+          return response.text();
+        }).then(function(body)  {
+          const top_image = body;
+          // console.log(top_image);
+          return top_image;
+        });// fetch
+    } else {
+      console.error('No valid url foumd in URL object: %s', JSON.stringify(url_object));
+      return null;
+    }// if-else
+  } catch (e) {
+    console.error(e);
+    return null;
+  }// try-catch
+}// get_top_image
