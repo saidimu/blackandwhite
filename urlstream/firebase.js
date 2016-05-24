@@ -8,3 +8,8 @@ firebase.initializeApp({
   },
   databaseURL: process.env.FIREBASE_DATABASE_URL
 });
+
+export const db = firebase.database();
+export const Tweets = db.ref('/tweets');
+export const Urls = db.ref('urls');
+export const TopImages = db.ref('top_images');
