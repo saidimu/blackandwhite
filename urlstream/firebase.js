@@ -1,4 +1,4 @@
-export const firebase = require("firebase");
+const firebase = require("firebase");
 
 firebase.initializeApp({
   serviceAccount: {
@@ -8,3 +8,5 @@ firebase.initializeApp({
   },
   databaseURL: process.env.FIREBASE_DATABASE_URL
 });
+
+export default firebase;
