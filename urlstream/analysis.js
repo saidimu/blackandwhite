@@ -125,38 +125,15 @@ export function save_urls() {
     const url_object = message.json();
     const tweet_id = url_object.tweet_id;
 
-    return Urls.create({
-      tweet_id: tweet_id,
+    return Urls.child(tweet_id).set({
       urls: url_object
-    }).then(function(urls_object) {
-      console.log('Tweet URL object saved!');
-
-      // Find a related Tweet object and associate with newly-created Urls object
-      Tweet.findOne({
-        attributes: ['tweet_id'],
-        where: {
-          tweet_id: tweet_id
-        }
-      }).then(function(tweet) {
-        tweet.addUrl(urls_object).then(function() {
-          console.log(
-            'Associated Urls["%s"] with Tweet["%s"]',
-            urls_object.get('tweet_id'), tweet.get('tweet_id')
-          );// console.log
-
-          message.finish();
-
-        }).catch(function(err)  {
-          console.error(err);
-          console.error(
-            'ERROR associating Urls["%s"] with Tweet["%s"]',
-            urls_object.get('tweet_id'), tweet.get('tweet_id')
-          );// console.error
-        });// tweet.addUrl
-      }).catch(function(err)  {
-        console.error(err);
-      });// Tweet.findOne
-
+    }).then(function(err) {
+      if(!err)  {
+        console.log('Tweet URL object saved!');
+        message.finish();
+      } else {
+        throw err;
+      }//if-else
     }).catch(function(err)  {
       console.error(err);
       message.requeue(null, false); // https://github.com/dudleycarr/nsqjs#new-readertopic-channel-options

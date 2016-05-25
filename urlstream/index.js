@@ -22,9 +22,9 @@ get_tweet_stream((tweet) => {
   publish(process.env.TWEETS_TOPIC, tweet);
 });// get_tweet_stream
 
-// process_tweets();
+process_tweets();
 // save_tweets();
 // process_urls();
-// save_urls();
+save_urls();
 // process_top_image();
 // save_top_image();
