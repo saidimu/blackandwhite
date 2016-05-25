@@ -122,22 +122,24 @@ export function save_urls() {
   );// init_reader
 
   function on_url(message)  {
-    const url_object = message.json();
-    const tweet_id = url_object.tweet_id;
+    const message_object = message.json();
+    const tweet_id = message_object.tweet_id;
+    const url = message_object.url || {}; // FIXME TODO check for empty url object
 
-    return Urls.child(tweet_id).set({
-      urls: url_object
-    }).then(function(err) {
-      if(!err)  {
-        console.log('Tweet URL object saved!');
-        message.finish();
-      } else {
-        throw err;
-      }//if-else
-    }).catch(function(err)  {
-      console.error(err);
-      message.requeue(null, false); // https://github.com/dudleycarr/nsqjs#new-readertopic-channel-options
-    });// Urls.create
+    return Urls
+      .child(tweet_id)
+      .set(url)
+      .then(function(err) {
+        if(!err)  {
+          console.log('Tweet URL object saved!');
+          message.finish();
+        } else {
+          throw err;
+        }//if-else
+      }).catch(function(err)  {
+        console.error(err);
+        message.requeue(null, false); // https://github.com/dudleycarr/nsqjs#new-readertopic-channel-options
+      });// Urls.child
   }// on_url
 }// save_urls
 
