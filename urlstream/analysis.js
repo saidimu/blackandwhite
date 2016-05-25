@@ -128,7 +128,7 @@ export function save_urls() {
 
     return Urls
       .child(tweet_id)
-      .set(url)
+      .push(url)
       .then(function(err) {
         if(!err)  {
           console.log('Tweet URL object saved!');
