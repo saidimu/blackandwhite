@@ -1,4 +1,5 @@
 var fetch = require('node-fetch');
+var urlencode = require('urlencode');
 
 import {
   init_writer,
@@ -126,14 +127,15 @@ export function save_urls() {
     const tweet_id = message_object.tweet_id;
     const url_object = message_object.url || {}; // FIXME TODO check for empty url object
     const expanded_url = url_object.expanded_url || null; // FIXME TODO check for empty url object
+    const encoded_url = urlencode.encode(expanded_url);
 
-    if(!expanded_url)  {
+    if(!encoded_url)  {
       console.error("Missing a valid url object in message.");
       message.requeue(null, false); // https://github.com/dudleycarr/nsqjs#new-readertopic-channel-options
       return;
     }//if
 
-    return Urls.child(expanded_url).child(tweet_id).push(url_object)
+    return Urls.child(encoded_url).child(tweet_id).push(url_object)
     .then(function(err) {
       if(!err)  {
         console.log('Tweet URL object saved!');
