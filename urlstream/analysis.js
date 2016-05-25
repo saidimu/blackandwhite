@@ -39,7 +39,7 @@ export function process_tweets() {
         // console.log('Publishing message: %s', JSON.stringify(url));
         publish_message(process.env.TWEET_URLS_TOPIC, {
           tweet_id: tweet_id,
-          url: url
+          urls: url
         });// publish_message
       }// if
     });// forEach
@@ -124,22 +124,27 @@ export function save_urls() {
   function on_url(message)  {
     const message_object = message.json();
     const tweet_id = message_object.tweet_id;
-    const url = message_object.url || {}; // FIXME TODO check for empty url object
+    const url_object = message_object.url || {}; // FIXME TODO check for empty url object
+    const expanded_url = url_object.expanded_url || null; // FIXME TODO check for empty url object
 
-    return Urls
-      .child(tweet_id)
-      .push(url)
-      .then(function(err) {
-        if(!err)  {
-          console.log('Tweet URL object saved!');
-          message.finish();
-        } else {
-          throw err;
-        }//if-else
-      }).catch(function(err)  {
-        console.error(err);
-        message.requeue(null, false); // https://github.com/dudleycarr/nsqjs#new-readertopic-channel-options
-      });// Urls.child
+    if(!expanded_url)  {
+      console.error("Missing a valid url object in message.");
+      message.requeue(null, false); // https://github.com/dudleycarr/nsqjs#new-readertopic-channel-options
+      return;
+    }//if
+
+    return Urls.child(expanded_url).child(tweet_id).push(url_object)
+    .then(function(err) {
+      if(!err)  {
+        console.log('Tweet URL object saved!');
+        message.finish();
+      } else {
+        throw err;
+      }//if-else
+    }).catch(function(err)  {
+      console.error(err);
+      message.requeue(null, false); // https://github.com/dudleycarr/nsqjs#new-readertopic-channel-options
+    });// Urls.child
   }// on_url
 }// save_urls
 
