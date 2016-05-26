@@ -2,7 +2,6 @@ from newspaper import Article
 
 def url_handler(url=None, nlp=False):
     response = {
-        'article': None,
         'publish_date': None,
         'html': None,
         'title': None,
