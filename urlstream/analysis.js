@@ -77,8 +77,7 @@ export function process_urls() {
     Urls.child(tweet_id)
       .orderByChild("expanded_url")
       .equalTo(expanded_url)
-      .on("child_changed")
-      .then(function(child) {
+      .on("child_changed", function(child) {
         const child_urls = child.val();
         if(expanded_url !== child_urls.expanded_url)  {
           console.log("Child url '%s' not found in Firebase. Starting processing...", expanded_url);
