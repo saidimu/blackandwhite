@@ -9,7 +9,6 @@ import {
 
 
 import {
-  Tweet,
   Urls,
   TopImage
 } from './datastore.js';
@@ -49,33 +48,6 @@ export function process_tweets() {
   }// on_tweet
 }// process_tweets
 
-export function save_tweets() {
-  init_reader(
-    process.env.TWEETS_TOPIC,
-    process.env.TWEETS_SAVE_CHANNEL,
-    {
-      message: on_tweet,
-      discard: on_discard_message
-    }
-  );// init_reader
-
-  function on_tweet(message)  {
-    // console.log(message.id);
-    const tweet = message.json();
-    const tweet_id = tweet.id_str;
-    return Tweet.create({
-      tweet_id: tweet_id,
-      tweet: tweet
-    }).then(function(tweet) {
-      console.log('Tweet saved!');
-      message.finish();
-    }).catch(function(err)  {
-      console.error(err);
-      message.requeue(null, false); // https://github.com/dudleycarr/nsqjs#new-readertopic-channel-options
-    });// Tweet.create
-  }// on_tweet
-}// save_tweets
-
 export function process_urls() {
   init_reader(
     process.env.TWEET_URLS_TOPIC,
@@ -102,40 +74,51 @@ export function process_urls() {
       return;
     }//if
 
-    get_top_image(expanded_url)
-      .then(function(article)  {
-        const {
-          publish_date,
-          html,
-          title,
-          top_image,
-          source_url,
-          images,
-          authors,
-          text,
-          canonical_link,
-          movies,
-          keywords,
-          summary
-        } = article;
+    Urls.child(tweet_id)
+      .orderByChild("expanded_url")
+      .equalTo(expanded_url)
+      .on("child_changed")
+      .then(function(child) {
+        const child_urls = child.val();
+        if(expanded_url !== child_urls.expanded_url)  {
+          console.log("Child url '%s' not found in Firebase. Starting processing...", expanded_url);
+          get_top_image(expanded_url)
+            .then(function(article)  {
+              const {
+                publish_date,
+                html,
+                title,
+                top_image,
+                source_url,
+                images,
+                authors,
+                text,
+                canonical_link,
+                movies,
+                keywords,
+                summary
+              } = article;
 
-        console.log(title);
-        if(top_image) {
-          const article_message = {
-            tweet_id: tweet_id,
-            expanded_url: expanded_url,
-            article: article
-          };// article_message
-          // console.log('Publishing message: %s', JSON.stringify(top_image_message));
-          publish_message(process.env.TOPIMAGE_TOPIC, article_message);
-          message.finish();
-        } else {
-          message.requeue(null, false);
-        }// if-else
-      }).catch(function(err)  {
-        console.error(err);
-        message.requeue(null, false);
-      });// get_top_image
+              console.log(title);
+              if(top_image) {
+                const article_message = {
+                  tweet_id: tweet_id,
+                  expanded_url: expanded_url,
+                  article: article
+                };// article_message
+                // console.log('Publishing message: %s', JSON.stringify(top_image_message));
+                publish_message(process.env.TOPIMAGE_TOPIC, article_message);
+                message.finish();
+              } else {
+                message.requeue(null, false);
+              }// if-else
+            }).catch(function(err)  {
+              console.error(err);
+              message.requeue(null, false);
+            });// get_top_image
+        }//if
+      });//Urls.child`
+
   }// on_url
 }// process_urls
 
