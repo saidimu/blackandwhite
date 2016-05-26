@@ -87,16 +87,28 @@ export function process_urls() {
   );// init_reader
 
   function on_url(message)  {
-    const url_object = message.json();
-    const tweet_id = url_object.tweet_id;
+    // const url_object = message.json();
+    // const tweet_id = url_object.tweet_id;
     // console.log('Received message [%s]: %s', message.id, JSON.stringify(url));
 
-    get_top_image(url_object)
+    const message_object = message.json();
+    const tweet_id = message_object.tweet_id;
+    const url_object = message_object.url || {}; // FIXME TODO check for empty url object
+    const expanded_url = url_object.expanded_url || null; // FIXME TODO check for empty url object
+
+    if(!expanded_url)  {
+      console.error("Missing a valid url object in message: %s", JSON.stringify(url_object));
+      message.requeue(null, false); // https://github.com/dudleycarr/nsqjs#new-readertopic-channel-options
+      return;
+    }//if
+
+    get_top_image(expanded_url)
       .then(function(top_image)  {
         console.log(top_image);
         if(top_image) {
           const top_image_message = {
             tweet_id: tweet_id,
+            expanded_url: expanded_url,
             top_image: top_image
           };// top_image_message
           console.log('Publishing message: %s', JSON.stringify(top_image_message));
@@ -134,6 +146,9 @@ export function save_urls() {
       message.requeue(null, false); // https://github.com/dudleycarr/nsqjs#new-readertopic-channel-options
       return;
     }//if
+
+// var x = f.Urls.child('twitter_url').child(id_str).orderByChild("expanded_url").equalTo(expanded_url).on("value", function(snap) { console.log(snap.key, snap.val()); })
+// var x = f.Urls.child(id_str).orderByChild("expanded_url").equalTo(expanded_url).on("value", function(snap) { console.log(snap.key, snap.val()); })
 
     // return Urls.child(encoded_url).child(tweet_id).push(url_object)
     return Urls.child(tweet_id).push(url_object)
@@ -226,24 +241,18 @@ function on_discard_message(message)  {
   console.error(message);
 }// on_discard_message
 
-function get_top_image(url_object)  {
-  try {
-    const url = url_object.url; // FIXME TODO HACK
-    if(url) {
-      return fetch(`${endpoint}?url=${url}`)
-        .then(function(response)  {
-          return response.text();
-        }).then(function(body)  {
-          const top_image = body;
-          // console.log(top_image);
-          return top_image;
-        });// fetch
-    } else {
-      console.error('No valid url foumd in URL object: %s', JSON.stringify(url_object));
-      return null;
-    }// if-else
-  } catch (e) {
-    console.error(e);
+function get_top_image(expanded_url)  {
+  if(expanded_url) {
+    return fetch(`${endpoint}?url=${expanded_url}`)
+      .then(function(response)  {
+        return response.text();
+      }).then(function(body)  {
+        const top_image = body;
+        // console.log(top_image);
+        return top_image;
+      });// fetch
+  } else {
+    console.error('Not a valid url : %s', expanded_url);
     return null;
-  }// try-catch
+  }// if-else
 }// get_top_image

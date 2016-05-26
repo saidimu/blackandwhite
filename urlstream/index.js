@@ -24,7 +24,7 @@ get_tweet_stream((tweet) => {
 
 process_tweets();
 // save_tweets();
-// process_urls();
+process_urls();
 save_urls();
 // process_top_image();
 // save_top_image();
