@@ -56,6 +56,8 @@ def url_handler(url=None, nlp=False):
         response['publish_date'] = article.publish_date
         response['source_url'] = article.source_url
         response['canonical_link'] = article.canonical_link
+
+        return response
     except Exception as e:
         print(e)
         return response
