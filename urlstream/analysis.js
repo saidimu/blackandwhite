@@ -135,7 +135,8 @@ export function save_urls() {
       return;
     }//if
 
-    return Urls.child(encoded_url).child(tweet_id).push(url_object)
+    // return Urls.child(encoded_url).child(tweet_id).push(url_object)
+    return Urls.child(tweet_id).push(url_object)
     .then(function(err) {
       if(!err)  {
         console.log('Tweet URL object saved!');
