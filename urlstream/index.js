@@ -23,8 +23,8 @@ get_tweet_stream((tweet) => {
 });// get_tweet_stream
 
 process_tweets();
-save_tweets();
+// save_tweets();
 process_urls();
 save_urls();
-process_top_image();
-save_top_image();
+// process_top_image();
+// save_top_image();
