@@ -38,7 +38,7 @@ def url_handler(url=None, nlp=False):
             response['top_image'] = article.top_image
         ##if-else
 
-        if nlp is True;
+        if nlp is True:
             article.nlp()
             response['summary'] = article.summary
             response['keywords'] = article.keywords
