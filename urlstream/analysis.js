@@ -104,8 +104,23 @@ export function process_urls() {
 
     get_top_image(expanded_url)
       .then(function(article)  {
-        console.log(article.title);
-        if(article.top_image) {
+        const {
+          publish_date,
+          html,
+          title,
+          top_image,
+          source_url,
+          images,
+          authors,
+          text,
+          canonical_link,
+          movies,
+          keywords,
+          summary
+        } = article;
+
+        console.log(title);
+        if(top_image) {
           const article_message = {
             tweet_id: tweet_id,
             expanded_url: expanded_url,
