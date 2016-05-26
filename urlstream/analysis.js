@@ -103,16 +103,16 @@ export function process_urls() {
     }//if
 
     get_top_image(expanded_url)
-      .then(function(top_image)  {
-        console.log(top_image);
-        if(top_image) {
-          const top_image_message = {
+      .then(function(article)  {
+        console.log(article.title);
+        if(article.top_image) {
+          const article_message = {
             tweet_id: tweet_id,
             expanded_url: expanded_url,
-            top_image: top_image
-          };// top_image_message
-          console.log('Publishing message: %s', JSON.stringify(top_image_message));
-          publish_message(process.env.TOPIMAGE_TOPIC, top_image_message);
+            article: article
+          };// article_message
+          // console.log('Publishing message: %s', JSON.stringify(top_image_message));
+          publish_message(process.env.TOPIMAGE_TOPIC, article_message);
           message.finish();
         } else {
           message.requeue(null, false);
@@ -245,11 +245,13 @@ function get_top_image(expanded_url)  {
   if(expanded_url) {
     return fetch(`${endpoint}?url=${expanded_url}`)
       .then(function(response)  {
-        return response.text();
-      }).then(function(body)  {
-        const top_image = body;
+        // return response.text();
+        return response.json();
+      }).then(function(json)  {
+        // const top_image = body;
         // console.log(top_image);
-        return top_image;
+        // return top_image;
+        return json;
       });// fetch
   } else {
     console.error('Not a valid url : %s', expanded_url);
