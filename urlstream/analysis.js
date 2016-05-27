@@ -70,7 +70,7 @@ export function process_urls() {
 
     if(!expanded_url)  {
       console.error("Missing a valid url object in message: %s", JSON.stringify(url_object));
-      message.requeue(null, false); // https://github.com/dudleycarr/nsqjs#new-readertopic-channel-options
+      message.requeue(null, true); // https://github.com/dudleycarr/nsqjs#new-readertopic-channel-options
       return;
     }//if
 
@@ -98,11 +98,11 @@ export function process_urls() {
                 publish_message(process.env.ARTICLE_TOPIC, article_message);
                 message.finish();
               } else {
-                message.requeue(null, false);
+                message.requeue(null, true);
               }// if-else
             }).catch(function(err)  {
               console.error(err);
-              message.requeue(null, false);
+              message.requeue(null, true);
             });// get_article
         }//if
       });//Urls.child`
@@ -129,7 +129,7 @@ export function save_urls() {
 
     if(!encoded_url)  {
       console.error("Missing a valid url object in message: %s", JSON.stringify(url_object));
-      message.requeue(null, false); // https://github.com/dudleycarr/nsqjs#new-readertopic-channel-options
+      message.requeue(null, true); // https://github.com/dudleycarr/nsqjs#new-readertopic-channel-options
       return;
     }//if
 
@@ -147,7 +147,7 @@ export function save_urls() {
       }//if-else
     }).catch(function(err)  {
       console.error(err);
-      message.requeue(null, false); // https://github.com/dudleycarr/nsqjs#new-readertopic-channel-options
+      message.requeue(null, true); // https://github.com/dudleycarr/nsqjs#new-readertopic-channel-options
     });// Urls.child
   }// on_url
 }// save_urls
@@ -218,7 +218,7 @@ export function save_articles() {
       }//if-else
     }).catch(function(err)  {
       console.error(err);
-      message.requeue(null, false); // https://github.com/dudleycarr/nsqjs#new-readertopic-channel-options
+      message.requeue(null, true); // https://github.com/dudleycarr/nsqjs#new-readertopic-channel-options
     });// Articles.child
   }// on_article
 }// save_articles
