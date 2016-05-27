@@ -4,7 +4,7 @@ var bunyan = require('bunyan');
 var Loggly = require('bunyan-loggly').Bunyan2Loggly;
 var hostname = require('os').hostname();
 
-export default function get_logger(name) {
+function get_logger(name) {
   if(!name) {
     throw new Error("Invalid logger name '%s'. Cannot create a logger", name);
   }//if
@@ -50,3 +50,5 @@ export default function get_logger(name) {
 
   return logger;
 }//get_logger()
+
+module.exports = get_logger;
