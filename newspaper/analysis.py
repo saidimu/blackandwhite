@@ -1,6 +1,6 @@
 from newspaper import Article
 
-def url_handler(url=None, nlp=False):
+def article_handler(url=None, nlp=False):
     response = {
         'publish_date': None,
         'html': None,
@@ -61,4 +61,4 @@ def url_handler(url=None, nlp=False):
         print(e)
         return response
     ##try-except
-##url_handler
+##article_handler

@@ -9,9 +9,8 @@ import {
 
 
 import {
-  Tweet,
   Urls,
-  TopImage
+  Articles
 } from './datastore.js';
 
 init_writer();
@@ -19,8 +18,8 @@ init_writer();
 const host = process.env.NEWSPAPER_PORT_8000_TCP_ADDR;
 const port = process.env.NEWSPAPER_PORT_8000_TCP_PORT;
 
-const endpoint = `http://${host}:${port}/top_image`;
-// const endpoint = `${host}/top_image`;
+const endpoint = `http://${host}:${port}/article`;
+// const endpoint = `${host}/article`;
 
 export function process_tweets() {
   init_reader(
@@ -49,33 +48,6 @@ export function process_tweets() {
   }// on_tweet
 }// process_tweets
 
-export function save_tweets() {
-  init_reader(
-    process.env.TWEETS_TOPIC,
-    process.env.TWEETS_SAVE_CHANNEL,
-    {
-      message: on_tweet,
-      discard: on_discard_message
-    }
-  );// init_reader
-
-  function on_tweet(message)  {
-    // console.log(message.id);
-    const tweet = message.json();
-    const tweet_id = tweet.id_str;
-    return Tweet.create({
-      tweet_id: tweet_id,
-      tweet: tweet
-    }).then(function(tweet) {
-      console.log('Tweet saved!');
-      message.finish();
-    }).catch(function(err)  {
-      console.error(err);
-      message.requeue(null, false); // https://github.com/dudleycarr/nsqjs#new-readertopic-channel-options
-    });// Tweet.create
-  }// on_tweet
-}// save_tweets
-
 export function process_urls() {
   init_reader(
     process.env.TWEET_URLS_TOPIC,
@@ -102,25 +74,50 @@ export function process_urls() {
       return;
     }//if
 
-    get_top_image(expanded_url)
-      .then(function(article)  {
-        console.log(article.title);
-        if(article.top_image) {
-          const article_message = {
-            tweet_id: tweet_id,
-            expanded_url: expanded_url,
-            article: article
-          };// article_message
-          // console.log('Publishing message: %s', JSON.stringify(top_image_message));
-          publish_message(process.env.TOPIMAGE_TOPIC, article_message);
-          message.finish();
-        } else {
-          message.requeue(null, false);
-        }// if-else
-      }).catch(function(err)  {
-        console.error(err);
-        message.requeue(null, false);
-      });// get_top_image
+    Urls.child(tweet_id)
+      .orderByChild("expanded_url")
+      .equalTo(expanded_url)
+      .on("child_changed", function(child) {
+        const child_urls = child.val();
+        if(expanded_url !== child_urls.expanded_url)  {
+          console.log("Child url '%s' not found in Firebase. Starting processing...", expanded_url);
+          get_article(expanded_url)
+            .then(function(article)  {
+              const {
+                publish_date,
+                html,
+                title,
+                article,
+                source_url,
+                images,
+                authors,
+                text,
+                canonical_link,
+                movies,
+                keywords,
+                summary
+              } = article;
+
+              console.log(title);
+              if(article) {
+                const article_message = {
+                  tweet_id: tweet_id,
+                  expanded_url: expanded_url,
+                  article: article
+                };// article_message
+                // console.log('Publishing message: %s', JSON.stringify(article_message));
+                publish_message(process.env.ARTICLE_TOPIC, article_message);
+                message.finish();
+              } else {
+                message.requeue(null, false);
+              }// if-else
+            }).catch(function(err)  {
+              console.error(err);
+              message.requeue(null, false);
+            });// get_article
+        }//if
+      });//Urls.child`
+
   }// on_url
 }// process_urls
 
@@ -166,74 +163,77 @@ export function save_urls() {
   }// on_url
 }// save_urls
 
-export function process_top_image() {
+export function process_articles() {
   init_reader(
-    process.env.TOPIMAGE_TOPIC,
-    process.env.TOPIMAGE_PROCESS_CHANNEL,
+    process.env.ARTICLE_TOPIC,
+    process.env.ARTICLE_PROCESS_CHANNEL,
     {
-      message: on_top_image,
+      message: on_article,
       discard: on_discard_message
     }
   );// init_reader
 
-  function on_top_image(message)  {
+  function on_article(message)  {
     console.log(message.id);
-  }// on_top_image
-}// process_top_image
+  }// on_article
+}// process_articles
 
-export function save_top_image() {
+export function save_articles() {
   init_reader(
-    process.env.TOPIMAGE_TOPIC,
-    process.env.TOPIMAGE_SAVE_CHANNEL,
+    process.env.ARTICLE_TOPIC,
+    process.env.ARTICLE_SAVE_CHANNEL,
     {
-      message: on_top_image,
+      message: on_article,
       discard: on_discard_message
     }
   );// init_reader
 
-  function on_top_image(message)  {
-    const top_image_object = message.json();
-    const tweet_id = top_image_object.tweet_id;
-    const top_image = top_image_object.top_image;
+  function on_article(message)  {
+    const message_object = message.json();
+    const tweet_id = message_object.tweet_id;
+    const expanded_url = message_object.expanded_url;
+    const article = message_object.article;
 
-    return TopImage.create({
-      top_image: top_image
-    }).then(function(top_image) {
-      console.log('TopImage URL saved!');
+    const {
+      publish_date,
+      html,
+      title,
+      article,
+      source_url,
+      images,
+      authors,
+      text,
+      canonical_link,
+      movies,
+      keywords,
+      summary
+    } = article;
 
-      // Find a related Urls object and associate with newly-created TopImage object
-      Urls.findOne({
-        attributes: ['tweet_id'],
-        where: {
-          tweet_id: tweet_id
-        }
-      }).then(function(urls_object) {
-        // associate newly-created Urls object with a Tweet object
-        urls_object.setTopimage(top_image).then(function() {
-          console.log(
-            'Associated Urls["%s"] with TopImage["%s"]',
-            urls_object.get('tweet_id'), top_image.get('tweet_id')
-          );// console.log
+    const article_object = {
+      expanded_url,
+      article,
+      images,
+      publish_date,
+      title,
+      authors,
+      keywords,
+      summary
+    };// article_object
 
-          message.finish();
-
-        }).catch(function(err)  {
-          console.error(err);
-          console.error(
-            'ERROR associating Urls["%s"] with TopImage["%s"]',
-            urls_object.get('tweet_id'), top_image.get('tweet_id')
-          );// console.error
-        });// url_object.addTopImage
-      }).catch(function(err)  {
-        console.error(err);
-      });// Urls.findOne
-
+    return Articles.child(tweet_id).push(article_object)
+    .then(function(err) {
+      if(!err)  {
+        console.log('Article object saved!');
+        message.finish();
+      } else {
+        throw err;
+      }//if-else
     }).catch(function(err)  {
       console.error(err);
       message.requeue(null, false); // https://github.com/dudleycarr/nsqjs#new-readertopic-channel-options
-    });// TopImage.create
-  }// on_url
-}// save_top_image
+    });// Articles.child
+  }// on_article
+}// save_articles
 
 function on_discard_message(message)  {
   // FIXME TODO publish to a 'special' error topic?
@@ -241,20 +241,20 @@ function on_discard_message(message)  {
   console.error(message);
 }// on_discard_message
 
-function get_top_image(expanded_url)  {
+function get_article(expanded_url)  {
   if(expanded_url) {
     return fetch(`${endpoint}?url=${expanded_url}`)
       .then(function(response)  {
         // return response.text();
         return response.json();
       }).then(function(json)  {
-        // const top_image = body;
-        // console.log(top_image);
-        // return top_image;
+        // const article = body;
+        // console.log(article);
+        // return article;
         return json;
       });// fetch
   } else {
     console.error('Not a valid url : %s', expanded_url);
     return null;
   }// if-else
-}// get_top_image
+}// get_article
