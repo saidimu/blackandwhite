@@ -12,4 +12,4 @@ firebase.initializeApp({
 export const db = firebase.database();
 export const Tweets = db.ref('tweets');
 export const Urls = db.ref('urls');
-export const TopImages = db.ref('top_images');
+export const Articles = db.ref('articles');
