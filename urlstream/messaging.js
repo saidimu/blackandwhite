@@ -43,8 +43,8 @@ export function init_reader(topic, channel, handlers) {
   const options = {
     // https://github.com/dudleycarr/nsqjs#new-readertopic-channel-options
     nsqdTCPAddresses: `${nsqd_host}:${nsqd_port}`,
-    maxAttempts: process.env.NSQD_READER_MAX_ATTEMPTS || 0,
-    maxInFlight: process.env.NSQD_READER_MAX_ATTEMPTS || 10
+    maxAttempts: parseInt(process.env.NSQD_READER_MAX_ATTEMPTS) || 0,
+    maxInFlight: parseInt(process.env.NSQD_READER_MAX_IN_FLIGHT) || 10
   };// options
 
   console.log("Reader options: %s", JSON.stringify(options));
