@@ -73,7 +73,7 @@ export function process_urls() {
     log.debug({tweet_id, url_object}, 'Urls message object');
 
     if(!expanded_url)  {
-      log.error({url_object}, "Missing a valid url object in message");
+      log.error({url_object}, "Missing a valid expanded_url object in message");
       message.requeue(null, true); // https://github.com/dudleycarr/nsqjs#new-readertopic-channel-options
       return;
     }//if
@@ -132,7 +132,7 @@ export function save_urls() {
     const expanded_url = url_object.expanded_url || null; // FIXME TODO check for empty url object
 
     if(!expanded_url)  {
-      console.error("Missing a valid url object in message: %s", JSON.stringify(url_object));
+      log.error({url_object}, "Missing a valid expanded_url object in message");
       message.requeue(null, true); // https://github.com/dudleycarr/nsqjs#new-readertopic-channel-options
       return;
     }//if
@@ -143,13 +143,13 @@ export function save_urls() {
     return Urls.child(tweet_id).push(url_object)
     .then(function(err) {
       if(!err)  {
-        console.log('Tweet URL object saved!');
+        log.debug({tweet_id, url_object}, 'Tweet URL object saved!');
         message.finish();
       } else {
-        throw err;
+        log.error({err});
       }//if-else
     }).catch(function(err)  {
-      console.error(err);
+      log.error({err});
       message.requeue(null, true); // https://github.com/dudleycarr/nsqjs#new-readertopic-channel-options
     });// Urls.child
   }// on_url
@@ -214,13 +214,13 @@ export function save_articles() {
     return Articles.child(tweet_id).push(article_object)
     .then(function(err) {
       if(!err)  {
-        console.log('Article object saved!');
+        log.debug({tweet_id, expanded_url}, 'Article object saved!');
         message.finish();
       } else {
-        throw err;
+        log.error({err});
       }//if-else
     }).catch(function(err)  {
-      console.error(err);
+      log.error({err});
       message.requeue(null, true); // https://github.com/dudleycarr/nsqjs#new-readertopic-channel-options
     });// Articles.child
   }// on_article
@@ -235,16 +235,12 @@ function get_article(expanded_url)  {
   if(expanded_url) {
     return fetch(`${endpoint}?url=${expanded_url}`)
       .then(function(response)  {
-        // return response.text();
         return response.json();
       }).then(function(json)  {
-        // const article = body;
-        // console.log(article);
-        // return article;
         return json;
       });// fetch
   } else {
-    console.error('Not a valid url : %s', expanded_url);
+    log.error({expanded_url}, 'Not a valid url');
     return null;
   }// if-else
 }// get_article
