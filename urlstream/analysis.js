@@ -224,9 +224,8 @@ export function save_articles() {
 }// save_articles
 
 function on_discard_message(message)  {
-  // FIXME TODO publish to a 'special' error topic?
   console.error('Received Message DISCARD event.');
-  console.error(message);
+  publish_message(process.env.DISCARDED_MESSAGES_TOPIC, message.json());
 }// on_discard_message
 
 function get_article(expanded_url)  {
