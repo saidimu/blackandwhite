@@ -84,18 +84,7 @@ export function process_urls() {
           get_article(expanded_url)
             .then(function(article)  {
               const {
-                publish_date,
-                html,
-                title,
-                article,
-                source_url,
-                images,
-                authors,
-                text,
-                canonical_link,
-                movies,
-                keywords,
-                summary
+                title
               } = article;
 
               console.log(title);
