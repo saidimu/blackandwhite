@@ -1,5 +1,8 @@
 var fetch = require('node-fetch');
-var urlencode = require('urlencode');
+
+var path = require('path');
+var appname = path.basename(__filename, '.js');
+var log = require('./logging.js')(appname);
 
 import {
   init_writer,
@@ -19,7 +22,6 @@ const host = process.env.NEWSPAPER_PORT_8000_TCP_ADDR;
 const port = process.env.NEWSPAPER_PORT_8000_TCP_PORT;
 
 const endpoint = `http://${host}:${port}/article`;
-// const endpoint = `${host}/article`;
 
 export function process_tweets() {
   init_reader(
@@ -36,7 +38,7 @@ export function process_tweets() {
     const tweet_id = tweet.id_str;
     tweet.entities.urls.forEach((url) => {
       if(url) {
-        // console.log('Publishing message: %s', JSON.stringify(url));
+        log.debug({tweet_id, url}, 'Urls in tweet');
         publish_message(process.env.TWEET_URLS_TOPIC, {
           tweet_id: tweet_id,
           urls: url
@@ -68,8 +70,10 @@ export function process_urls() {
     const url_object = message_object.url || message_object.urls || {}; // FIXME TODO check for empty url object
     const expanded_url = url_object.expanded_url || null; // FIXME TODO check for empty url object
 
+    log.debug({tweet_id, url_object}, 'Urls message object');
+
     if(!expanded_url)  {
-      console.error("Missing a valid url object in message: %s", JSON.stringify(url_object));
+      log.error({url_object}, "Missing a valid url object in message");
       message.requeue(null, true); // https://github.com/dudleycarr/nsqjs#new-readertopic-channel-options
       return;
     }//if
@@ -80,14 +84,9 @@ export function process_urls() {
       .on("child_changed", function(child) {
         const child_urls = child.val();
         if(expanded_url !== child_urls.expanded_url)  {
-          console.log("Child url '%s' not found in Firebase. Starting processing...", expanded_url);
+          log.info({expanded_url}, "Child url not found in Firebase. Starting processing...");
           get_article(expanded_url)
             .then(function(article)  {
-              const {
-                title
-              } = article;
-
-              console.log(title);
               if(article) {
                 const article_message = {
                   tweet_id: tweet_id,
@@ -95,13 +94,19 @@ export function process_urls() {
                   article: article
                 };// article_message
                 // console.log('Publishing message: %s', JSON.stringify(article_message));
+                log.debug({
+                  article_message
+                }, 'Article message');
                 publish_message(process.env.ARTICLE_TOPIC, article_message);
                 message.finish();
               } else {
+                log.warn({
+                  tweet_id, url_object
+                }, 'Article is empty.');
                 message.requeue(null, true);
               }// if-else
             }).catch(function(err)  {
-              console.error(err);
+              log.error({err});
               message.requeue(null, true);
             });// get_article
         }//if
@@ -125,9 +130,8 @@ export function save_urls() {
     const tweet_id = message_object.tweet_id;
     const url_object = message_object.url || message_object.urls || {}; // FIXME TODO check for empty url object
     const expanded_url = url_object.expanded_url || null; // FIXME TODO check for empty url object
-    const encoded_url = urlencode.encode(expanded_url);
 
-    if(!encoded_url)  {
+    if(!expanded_url)  {
       console.error("Missing a valid url object in message: %s", JSON.stringify(url_object));
       message.requeue(null, true); // https://github.com/dudleycarr/nsqjs#new-readertopic-channel-options
       return;
@@ -136,7 +140,6 @@ export function save_urls() {
 // var x = f.Urls.child('twitter_url').child(id_str).orderByChild("expanded_url").equalTo(expanded_url).on("value", function(snap) { console.log(snap.key, snap.val()); })
 // var x = f.Urls.child(id_str).orderByChild("expanded_url").equalTo(expanded_url).on("value", function(snap) { console.log(snap.key, snap.val()); })
 
-    // return Urls.child(encoded_url).child(tweet_id).push(url_object)
     return Urls.child(tweet_id).push(url_object)
     .then(function(err) {
       if(!err)  {
