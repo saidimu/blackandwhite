@@ -65,7 +65,7 @@ export function process_urls() {
 
     const message_object = message.json();
     const tweet_id = message_object.tweet_id;
-    const url_object = message_object.url || {}; // FIXME TODO check for empty url object
+    const url_object = message_object.url || message_object.urls || {}; // FIXME TODO check for empty url object
     const expanded_url = url_object.expanded_url || null; // FIXME TODO check for empty url object
 
     if(!expanded_url)  {
@@ -123,12 +123,12 @@ export function save_urls() {
   function on_url(message)  {
     const message_object = message.json();
     const tweet_id = message_object.tweet_id;
-    const url_object = message_object.url || {}; // FIXME TODO check for empty url object
+    const url_object = message_object.url || message_object.urls || {}; // FIXME TODO check for empty url object
     const expanded_url = url_object.expanded_url || null; // FIXME TODO check for empty url object
     const encoded_url = urlencode.encode(expanded_url);
 
     if(!encoded_url)  {
-      console.error("Missing a valid url object in message.");
+      console.error("Missing a valid url object in message: %s", JSON.stringify(url_object));
       message.requeue(null, false); // https://github.com/dudleycarr/nsqjs#new-readertopic-channel-options
       return;
     }//if
