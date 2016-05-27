@@ -1,7 +1,7 @@
 'use strict';
 
 var bunyan = require('bunyan');
-var Loggly = require('bunyan-loggly').Bunyan2Loggly;
+var Loggly = require('bunyan-loggly');
 var hostname = require('os').hostname();
 
 function get_logger(name) {
@@ -25,7 +25,7 @@ function get_logger(name) {
       stream: new Loggly({
         token: process.env.LOGGLY_TOKEN,
         subdomain: process.env.LOGGLY_SUBDOMAIN
-      }, process.env.LOGGLY_BUFFER_SIZE || 1000)
+      }, process.env.LOGGLY_BUFFER_SIZE || 100)
     };//loggly_stream
 
     streams.push(loggly_stream);
@@ -35,7 +35,6 @@ function get_logger(name) {
     console.log('Loggly logging is DISABLED.');
 
   }//if
-
 
   var logger = bunyan.createLogger({
     name: hostname,
