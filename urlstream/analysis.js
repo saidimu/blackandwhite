@@ -198,7 +198,6 @@ export function save_articles() {
       publish_date,
       html,
       title,
-      article,
       source_url,
       images,
       authors,
