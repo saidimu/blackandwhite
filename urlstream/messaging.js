@@ -40,15 +40,19 @@ export function publish(topic, message, callback) {
 }// publish
 
 export function init_reader(topic, channel, handlers) {
-  const host = `${nsqd_host}:${nsqd_port}`;
-  console.log('NSQD host: ', host);
+  const options = {
+    // https://github.com/dudleycarr/nsqjs#new-readertopic-channel-options
+    nsqdTCPAddresses: `${nsqd_host}:${nsqd_port}`,
+    maxAttempts: process.env.NSQD_READER_MAX_ATTEMPTS || 0,
+    maxInFlight: process.env.NSQD_READER_MAX_ATTEMPTS || 10
+  };// options
+
+  console.log("Reader options: %s", JSON.stringify(options));
+
   reader = new nsq.Reader(
     topic,
-    channel, {
-      // https://github.com/dudleycarr/nsqjs#new-readertopic-channel-options
-      nsqdTCPAddresses: host,
-      maxAttempts: 0
-    }
+    channel,
+    options
   );// nsq.Reader
 
   reader.connect();

@@ -84,18 +84,7 @@ export function process_urls() {
           get_article(expanded_url)
             .then(function(article)  {
               const {
-                publish_date,
-                html,
-                title,
-                article,
-                source_url,
-                images,
-                authors,
-                text,
-                canonical_link,
-                movies,
-                keywords,
-                summary
+                title
               } = article;
 
               console.log(title);
@@ -198,7 +187,6 @@ export function save_articles() {
       publish_date,
       html,
       title,
-      article,
       source_url,
       images,
       authors,
@@ -236,9 +224,8 @@ export function save_articles() {
 }// save_articles
 
 function on_discard_message(message)  {
-  // FIXME TODO publish to a 'special' error topic?
   console.error('Received Message DISCARD event.');
-  console.error(message);
+  publish_message(process.env.DISCARDED_MESSAGES_TOPIC, message.json());
 }// on_discard_message
 
 function get_article(expanded_url)  {
