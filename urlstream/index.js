@@ -15,9 +15,16 @@ import {
   save_articles
 } from './analysis.js';
 
+var path = require('path');
+var appname = path.basename(__filename, '.js');
+var log = require('./logging.js')(appname);
+
 init_writer();
 
 get_tweet_stream((tweet) => {
+  log.info({
+    tweet_id: tweet.id_str
+  }, 'Received Tweet.');
   publish(process.env.TWEETS_TOPIC, tweet);
 });// get_tweet_stream
 
