@@ -140,14 +140,9 @@ export function save_urls() {
 // var x = f.Urls.child('twitter_url').child(id_str).orderByChild("expanded_url").equalTo(expanded_url).on("value", function(snap) { console.log(snap.key, snap.val()); })
 // var x = f.Urls.child(id_str).orderByChild("expanded_url").equalTo(expanded_url).on("value", function(snap) { console.log(snap.key, snap.val()); })
 
-    return Urls.child(tweet_id).push(url_object)
-    .then(function(err) {
-      if(!err)  {
-        log.debug({tweet_id, url_object}, 'Tweet URL object saved!');
-        message.finish();
-      } else {
-        log.error({err});
-      }//if-else
+    Urls.child(tweet_id).push(url_object).then(function(value) {
+      log.debug({tweet_id, url_object}, 'Tweet URL object saved. Firebase key:"%s"', value.key);
+      message.finish();
     }).catch(function(err)  {
       log.error({err});
       message.requeue(null, true); // https://github.com/dudleycarr/nsqjs#new-readertopic-channel-options
@@ -211,14 +206,9 @@ export function save_articles() {
       summary
     };// article_object
 
-    return Articles.child(tweet_id).push(article_object)
-    .then(function(err) {
-      if(!err)  {
-        log.debug({tweet_id, expanded_url}, 'Article object saved!');
-        message.finish();
-      } else {
-        log.error({err});
-      }//if-else
+    return Articles.child(tweet_id).push(article_object).then(function(value) {
+      log.debug({tweet_id, expanded_url}, 'Article object saved. Firebase key:"%s"', value.key);
+      message.finish();
     }).catch(function(err)  {
       log.error({err});
       message.requeue(null, true); // https://github.com/dudleycarr/nsqjs#new-readertopic-channel-options
