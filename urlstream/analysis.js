@@ -87,7 +87,13 @@ export function process_urls() {
       .on("child_changed", function(child) {
         const child_urls = child.val();
         if(expanded_url !== child_urls.expanded_url)  {
+
           log.info({expanded_url}, "Child url not found in Firebase. Starting processing...");
+
+          // https://github.com/dudleycarr/nsqjs#message
+          // Tell nsqd that you want extra time to process the message. It extends the soft timeout by the normal timeout amount.
+          message.touch();
+            
           get_article(expanded_url)
             .then(function(article)  {
 
