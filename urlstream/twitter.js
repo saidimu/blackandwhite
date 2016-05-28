@@ -1,5 +1,9 @@
 var Twit = require('twit');
 
+var path = require('path');
+var appname = path.basename(__filename, '.js');
+var log = require('./logging.js')(appname);
+
 var twitter = new Twit({
   consumer_key:         process.env.TWITTER_CONSUMER_KEY,
   consumer_secret:      process.env.TWITTER_CONSUMER_SECRET,
@@ -8,27 +12,31 @@ var twitter = new Twit({
   timeout_ms:           60*1000,  // optional HTTP request timeout to apply to all requests.
 });//twitter
 
+const terms = process.env.TWITTER_STREAMING_TRACK_KEYWORDS.split(',');
+
+log.info({terms}, 'Twitter Streaming tracking terms');
+
 var stream = twitter.stream('statuses/filter', {
-  track: process.env.TWITTER_STREAMING_TRACK_KEYWORDS,
+  track: terms,
   language: process.env.TWITTER_STREAMING_LANGUAGE
 });// stream
 
 export function get_tweet_stream(tweet, disconnect, error) {
   tweet = tweet || function (tweet) {
-    console.log(tweet);
+    log.debug({tweet});
   };// tweet
 
   stream.on('tweet', tweet);// stream.on('tweet')
 
   disconnect = disconnect || function (disconnectMessage) {
-    console.error(disconnectMessage);
+    log.error({err: disconnectMessage});
     process.exit(1);  // exit with an error so Docker can handle restarts
   };// disconnect
 
   stream.on('disconnect', disconnect);// stream.on('disconnect')
 
   error = error || function (error) {
-    console.error(error);
+    log.error({err: error});
     process.exit(1);  // exit with an error so Docker can handle restarts
   };// error
 
