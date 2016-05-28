@@ -81,15 +81,16 @@ export function process_urls() {
       return;
     }//if
 
-    Urls.child(tweet_id)
+    // check if an Article with this url already exists in Firebase
+    // if not, create an Article from these urls and publish a message
+    Articles.child(tweet_id)
       .orderByChild("expanded_url")
       .equalTo(expanded_url)
       .on("child_changed", function(child) {
-        const child_urls = child.val();
-        log.info({expanded_url, child_urls}, "expanded_url & Firebase query child urls");
-        if(expanded_url !== child_urls.expanded_url)  {
+        const child_urls = child.val() || {};
+        if(child_urls && (expanded_url !== child_urls.expanded_url))  {
 
-          log.info({expanded_url, child_urls}, "Child url not found in Firebase. Starting processing...");
+          log.info({expanded_url, child_urls}, "Article NOT found in Firebase. Creating one...");
 
           // https://github.com/dudleycarr/nsqjs#message
           // Tell nsqd that you want extra time to process the message. It extends the soft timeout by the normal timeout amount.
@@ -127,7 +128,10 @@ export function process_urls() {
               message.requeue(null, true);
 
             });// get_article
-        }//if
+        } else {
+          log.info({expanded_url, child_urls}, "Article FOUND in Firebase.");
+          message.finish();
+        }// if-else
       });//Urls.child`
 
   }// on_url
