@@ -36,9 +36,12 @@ export function process_tweets() {
   function on_tweet(message)  {
     const tweet = message.json();
     const tweet_id = tweet.id_str;
+
+    log.debug({tweet_id, tweet}, 'Tweet message object');
+
     tweet.entities.urls.forEach((url) => {
       if(url) {
-        log.debug({tweet_id, url}, 'Urls in tweet');
+        log.info({tweet_id, url}, 'Urls in tweet');
         publish_message(process.env.TWEET_URLS_TOPIC, {
           tweet_id: tweet_id,
           urls: url
@@ -87,27 +90,35 @@ export function process_urls() {
           log.info({expanded_url}, "Child url not found in Firebase. Starting processing...");
           get_article(expanded_url)
             .then(function(article)  {
+
               if(article) {
-                const article_message = {
-                  tweet_id: tweet_id,
-                  expanded_url: expanded_url,
-                  article: article
-                };// article_message
-                // console.log('Publishing message: %s', JSON.stringify(article_message));
-                log.debug({
-                  article_message
-                }, 'Article message');
+                const article_message = { tweet_id, expanded_url, article };
+
+                log.info({
+                  tweet_id,
+                  expanded_url,
+                  article_title: article.title,
+                  source_url: article.source_url
+                }, 'Article metadata');
+
+                log.debug({ article_message }, 'Article message');
+
                 publish_message(process.env.ARTICLES_TOPIC, article_message);
+
                 message.finish();
+
               } else {
-                log.warn({
-                  tweet_id, url_object
-                }, 'Article is empty.');
+
+                log.warn({ tweet_id, url_object }, 'Article is empty.');
+
                 message.requeue(null, true);
+
               }// if-else
             }).catch(function(err)  {
+
               log.error({err});
               message.requeue(null, true);
+
             });// get_article
         }//if
       });//Urls.child`
@@ -141,7 +152,7 @@ export function save_urls() {
 // var x = f.Urls.child(id_str).orderByChild("expanded_url").equalTo(expanded_url).on("value", function(snap) { console.log(snap.key, snap.val()); })
 
     Urls.child(tweet_id).push(url_object).then(function(value) {
-      log.debug({tweet_id, url_object}, 'Tweet URL object saved. Firebase key:"%s"', value.key);
+      log.info({tweet_id, url_object, firebase_key: value.key}, 'Tweet URL object saved.');
       message.finish();
     }).catch(function(err)  {
       log.error({err});
@@ -207,7 +218,7 @@ export function save_articles() {
     };// article_object
 
     return Articles.child(tweet_id).push(article_object).then(function(value) {
-      log.debug({tweet_id, expanded_url}, 'Article object saved. Firebase key:"%s"', value.key);
+      log.info({tweet_id, expanded_url, firebase_key: value.key}, 'Article object saved.');
       message.finish();
     }).catch(function(err)  {
       log.error({err});
@@ -217,7 +228,7 @@ export function save_articles() {
 }// save_articles
 
 function on_discard_message(message)  {
-  console.error('Received Message DISCARD event.');
+  log.warn('Received Message DISCARD event.');
   publish_message(process.env.DISCARDED_MESSAGES_TOPIC, message.json());
 }// on_discard_message
 
