@@ -97,7 +97,7 @@ export function process_urls() {
                 log.debug({
                   article_message
                 }, 'Article message');
-                publish_message(process.env.ARTICLE_TOPIC, article_message);
+                publish_message(process.env.ARTICLES_TOPIC, article_message);
                 message.finish();
               } else {
                 log.warn({
@@ -157,8 +157,8 @@ export function save_urls() {
 
 export function process_articles() {
   init_reader(
-    process.env.ARTICLE_TOPIC,
-    process.env.ARTICLE_PROCESS_CHANNEL,
+    process.env.ARTICLES_TOPIC,
+    process.env.ARTICLES_PROCESS_CHANNEL,
     {
       message: on_article,
       discard: on_discard_message
@@ -172,8 +172,8 @@ export function process_articles() {
 
 export function save_articles() {
   init_reader(
-    process.env.ARTICLE_TOPIC,
-    process.env.ARTICLE_SAVE_CHANNEL,
+    process.env.ARTICLES_TOPIC,
+    process.env.ARTICLES_SAVE_CHANNEL,
     {
       message: on_article,
       discard: on_discard_message
