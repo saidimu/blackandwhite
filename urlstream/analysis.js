@@ -1,4 +1,5 @@
 var fetch = require('node-fetch');
+var urlparse = require('url').parse;
 
 var path = require('path');
 var appname = path.basename(__filename, '.js');
@@ -17,6 +18,11 @@ import {
 } from './datastore.js';
 
 init_writer();
+
+const IGNORE_HOSTNAMES = process.env.IGNORE_HOSTNAMES.split(',') || [];
+log.info({
+  ignore_hostnames: IGNORE_HOSTNAMES
+}, 'Hostnames to avoid Article processing');
 
 const host = process.env.NEWSPAPER_PORT_8000_TCP_ADDR;
 const port = process.env.NEWSPAPER_PORT_8000_TCP_PORT;
@@ -244,6 +250,15 @@ function on_discard_message(message)  {
 }// on_discard_message
 
 function get_article(expanded_url)  {
+  var link_hostname = urlparse(expanded_url).hostname || null;
+  if(IGNORE_HOSTNAMES.includes(link_hostname)) {
+    log.warn({
+      link_hostname,
+      ignore_hostnames: IGNORE_HOSTNAMES
+    }, 'Ignore link hostname b/c it is in list of IGNORED HOSTNAMES');
+    return null;
+  }//if
+
   if(expanded_url) {
     return fetch(`${endpoint}?url=${expanded_url}`)
       .then(function(response)  {
