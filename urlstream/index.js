@@ -22,10 +22,12 @@ var log = require('./logging.js')(appname);
 init_writer();
 
 get_tweet_stream((tweet) => {
+  const topic = process.env.TWEETS_TOPIC;
   log.info({
-    tweet_id: tweet.id_str
-  }, 'Received Tweet.');
-  publish(process.env.TWEETS_TOPIC, tweet);
+    tweet_id: tweet.id_str,
+    topic
+  }, 'Publishing received tweet.');
+  publish(topic, tweet);
 });// get_tweet_stream
 
 process_tweets();
