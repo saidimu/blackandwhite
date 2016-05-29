@@ -43,12 +43,14 @@ export function process_tweets() {
     const tweet = message.json();
     const tweet_id = tweet.id_str;
 
+    const topic = process.env.TWEET_URLS_TOPIC;
+
     log.debug({tweet_id, tweet}, 'Tweet message object');
 
     tweet.entities.urls.forEach((url) => {
       if(url) {
-        log.info({tweet_id, url}, 'Publishing urls in tweet');
-        publish_message(process.env.TWEET_URLS_TOPIC, {
+        log.info({topic, tweet_id, url}, 'Publishing urls in tweet');
+        publish_message(topic, {
           tweet_id: tweet_id,
           urls: url
         });// publish_message
@@ -70,10 +72,6 @@ export function process_urls() {
   );// init_reader
 
   function on_url(message)  {
-    // const url_object = message.json();
-    // const tweet_id = url_object.tweet_id;
-    // console.log('Received message [%s]: %s', message.id, JSON.stringify(url));
-
     const message_object = message.json();
     const tweet_id = message_object.tweet_id;
     const url_object = message_object.url || message_object.urls || {}; // FIXME TODO check for empty url object
@@ -84,7 +82,6 @@ export function process_urls() {
     if(!expanded_url)  {
       log.error({tweet_id, url_object}, "Missing a valid expanded_url object in message");
       message.finish();
-      // message.requeue(null, true); // https://github.com/dudleycarr/nsqjs#new-readertopic-channel-options
       return;
     }//if
 
@@ -103,6 +100,8 @@ export function process_urls() {
           // Tell nsqd that you want extra time to process the message. It extends the soft timeout by the normal timeout amount.
           message.touch();
 
+          const topic = process.env.ARTICLES_TOPIC;
+
           get_article(expanded_url)
             .then(function(article)  {
 
@@ -117,9 +116,9 @@ export function process_urls() {
                 }, 'Article metadata');
 
                 log.debug({ article_message }, 'Article message');
-                log.info({tweet_id, expanded_url}, 'Publishing Article related to url.');
+                log.info({topic, tweet_id, expanded_url}, 'Publishing Article related to url.');
 
-                publish_message(process.env.ARTICLES_TOPIC, article_message);
+                publish_message(topic, article_message);
 
                 message.finish();
 
@@ -165,19 +164,14 @@ export function save_urls() {
     if(!expanded_url)  {
       log.error({tweet_id, url_object}, "Missing a valid expanded_url object in message");
       message.finish();
-      // message.requeue(null, true); // https://github.com/dudleycarr/nsqjs#new-readertopic-channel-options
       return;
     }//if
-
-// var x = f.Urls.child('twitter_url').child(id_str).orderByChild("expanded_url").equalTo(expanded_url).on("value", function(snap) { console.log(snap.key, snap.val()); })
-// var x = f.Urls.child(id_str).orderByChild("expanded_url").equalTo(expanded_url).on("value", function(snap) { console.log(snap.key, snap.val()); })
 
     Urls.child(tweet_id).push(url_object).then(function(value) {
       log.info({tweet_id, url_object, firebase_key: value.key}, 'Tweet URL object saved.');
       message.finish();
     }).catch(function(err)  {
       log.error({err, tweet_id, url_object});
-      // message.requeue(null, true); // https://github.com/dudleycarr/nsqjs#new-readertopic-channel-options
     });// Urls.child
   }// on_url
 }// save_urls
@@ -246,18 +240,20 @@ export function save_articles() {
     }).catch(function(err)  {
       log.error({err, tweet_id, article_object});
       message.finish();
-      // message.requeue(null, true); // https://github.com/dudleycarr/nsqjs#new-readertopic-channel-options
     });// Articles.child
   }// on_article
 }// save_articles
 
 function on_discard_message(message)  {
-  log.warn('Received Message DISCARD event.');
-  publish_message(process.env.DISCARDED_MESSAGES_TOPIC, message.json());
+  const topic = process.env.DISCARDED_MESSAGES_TOPIC;
+  log.warn({topic}, 'Publishing Message DISCARD event.');
+  publish_message(topic, message.json());
 }// on_discard_message
 
 function get_article(expanded_url)  {
   var link_hostname = urlparse(expanded_url).hostname || null;
+  log.info({link_hostname});
+
   if(IGNORE_HOSTNAMES.includes(link_hostname)) {
     log.warn({
       link_hostname,
