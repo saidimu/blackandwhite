@@ -1,5 +1,5 @@
 from newspaper import Article
-from logging import loggly
+from logger import loggly
 
 def article_handler(url=None, nlp=False):
     response = {
