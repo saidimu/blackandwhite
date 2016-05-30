@@ -2,7 +2,7 @@
 import hug
 
 from analysis import article_handler
-from logging import loggly
+from logger import loggly
 
 @hug.cli()
 @hug.local()
