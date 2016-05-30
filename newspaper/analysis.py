@@ -1,5 +1,6 @@
 from newspaper import Article
 from logger import loggly
+from statsd import statsd
 
 def article_handler(url=None, nlp=False):
     response = {
@@ -18,12 +19,14 @@ def article_handler(url=None, nlp=False):
     }
 
     if not url:
+        statsd.increment('url_analysis.empty')
         loggly.error("Cannot parse empty URL")
         return response
     ## if
     try:
         article = Article(url)
         if not article.is_downloaded:
+            statsd.increment('url_analysis.download')
             loggly.info("Downloading article: '%s'", url)
             article.download()
         ##if
@@ -31,6 +34,7 @@ def article_handler(url=None, nlp=False):
         response['html'] = article.html
 
         if not article.is_parsed:
+            statsd.increment('url_analysis.parse')
             loggly.info("Parsing article: '%s'", url)
             article.parse()
         ##if
@@ -38,11 +42,13 @@ def article_handler(url=None, nlp=False):
         response['title'] = article.title
 
         if article.has_top_image() is True:
+            statsd.increment('url_analysis.get_top_image')
             loggly.info("Getting top_image: : '%s'", url)
             response['top_image'] = article.top_image
         ##if-else
 
         if nlp is True:
+            statsd.increment('url_analysis.nlp_process')
             loggly.info("Doing NLP processing: '%s'", url)
             article.nlp()
             response['summary'] = article.summary
@@ -57,8 +63,10 @@ def article_handler(url=None, nlp=False):
         response['source_url'] = article.source_url
         response['canonical_link'] = article.canonical_link
 
+        statsd.increment('url_analysis.ok')
         return response
     except Exception as e:
+        statsd.increment('url_analysis.error')
         loggly.error(e)
         return response
     ##try-except
