@@ -1,6 +1,8 @@
 from datadog import initialize
 from datadog import statsd
 
+import os
+
 ## throw an error if any of these env vars aren't set
 statsd_host = os['STATSD_PORT_8125_UDP_ADDR']
 statsd_port = os['STATSD_PORT_8125_UDP_PORT']
