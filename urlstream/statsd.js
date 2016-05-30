@@ -6,7 +6,7 @@ var StatsD = require('hot-shots');
 export var stats = new StatsD({
   host: process.env.STATSD_PORT_8125_UDP_ADDR,
   port: process.env.STATSD_PORT_8125_UDP_POR,
-  globalTags: [require('os').hostname()],
+  globalTags: [],
   errorHandler: function(err) {
     log.error({err}, "StatsD error.");
   }
