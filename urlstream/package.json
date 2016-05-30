@@ -11,6 +11,7 @@
   "author": "said apale <saidimu@gmail.com>",
   "license": "ISC",
   "dependencies": {
+    "performance-now": "^0.2.0",
     "babel-polyfill": "^6.8.0",
     "babel-preset-stage-0": "^6.5.0",
     "babel-register": "^6.8.0",
