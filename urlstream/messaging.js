@@ -4,6 +4,10 @@ var path = require('path');
 var appname = path.basename(__filename, '.js');
 var log = require('./logging.js')(appname);
 
+import {
+  stats
+} from './statsd.js';
+
 let reader;
 let writer;
 
@@ -19,18 +23,21 @@ export function init_writer(ready, error, closed) {
     log.info({
       nsqd_host, nsqd_port
     }, "NSQ Writer ready.");
+    stats.event('NSQ_Writer_Ready', 'NSQ Writer ready');
   };// ready
   writer.on('ready', ready);
 
   error = error || function (err) {
     console.error(err);
     log.error({ err });
+    stats.event('NSQ_Writer_Error', 'NSQ Writer error');
     process.exit(1);  // exit with an error so Docker can handle restarts
   };// error
   writer.on('error', error);
 
   closed = closed || function () {
     log.warn({nsqd_host, nsqd_port}, 'Writer closed');
+    stats.event('NSQ_Writer_Closed', 'NSQ Writer Closed');
     process.exit(1);  // exit with an error so Docker can handle restarts
   };// closed
   writer.on('closed', closed);
@@ -82,16 +89,19 @@ export function init_reader(topic, channel, handlers) {
 
   error = error || function (err) {
     log.error({err});
+    stats.event('NSQ_Reader_Error', 'NSQ Reader Error');
     process.exit(1);  // exit with an error so Docker can handle restarts
   };// error
   reader.on('error', error);
 
   nsqd_connected = nsqd_connected || function (host, port) {
+    stats.event('NSQ_Reader_Connected', 'NSQ Reader Connected');
     log.info({host, port}, "NSQD Reader CONNECTED");
   };// nsqd_connected
   reader.on('nqsd_connected', nsqd_connected);
 
   nsqd_closed = nsqd_closed || function (host, port) {
+    stats.event('NSQ_Reader_Closed', 'NSQ Reader Closed');
     log.info({host, port}, "NSQD Reader CLOSED");
     process.exit(1);  // exit with an error so Docker can handle restarts
   };// nsqd_closed
