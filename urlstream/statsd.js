@@ -3,7 +3,7 @@ var appname = path.basename(__filename, '.js');
 var log = require('./logging.js')(appname);
 
 var StatsD = require('hot-shots');
-var stats = new StatsD({
+export var stats = new StatsD({
   host: process.env.STATSD_PORT_8125_UDP_ADDR,
   port: process.env.STATSD_PORT_8125_UDP_POR,
   globalTags: [require('os').hostname()],
@@ -16,5 +16,3 @@ var stats = new StatsD({
 stats.socket.on('error', function(err) {
   log.error({err}, "Error in STATSD socket.");
 });// stats.socket
-
-export default stats;
