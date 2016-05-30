@@ -67,14 +67,13 @@ export function process_tweets() {
 }// process_tweets
 
 export function process_urls() {
-  init_reader(
-    process.env.TWEET_URLS_TOPIC,
-    process.env.TWEET_URLS_PROCESS_CHANNEL,
-    {
-      message: on_url,
-      discard: on_discard_message
-    }
-  );// init_reader
+  const topic = process.env.TWEET_URLS_TOPIC;
+  const channel = process.env.TWEET_URLS_PROCESS_CHANNEL;
+
+  init_reader(topic, channel, {
+    message: on_url,
+    discard: on_discard_message
+  });// init_reader
 
   function on_url(message)  {
     const message_object = message.json();
@@ -85,6 +84,7 @@ export function process_urls() {
     log.debug({tweet_id, url_object}, 'Urls message object');
 
     if(!expanded_url)  {
+      stats.increment('${topic}.${channel}.error.expanded_url');
       log.error({tweet_id, url_object}, "Missing a valid expanded_url object in message");
       message.finish();
       return;
@@ -112,7 +112,7 @@ export function process_urls() {
           // Tell nsqd that you want extra time to process the message. It extends the soft timeout by the normal timeout amount.
           message.touch();
 
-          const topic = process.env.ARTICLES_TOPIC;
+          const article_topic = process.env.ARTICLES_TOPIC;
 
           start = now();
 
@@ -133,17 +133,18 @@ export function process_urls() {
                 }, 'Article metadata');
 
                 log.debug({ article_message }, 'Article message');
-                log.info({topic, tweet_id, expanded_url}, 'Publishing Article related to url.');
+                log.info({article_topic, tweet_id, expanded_url}, 'Publishing Article related to url.');
 
-                publish_message(topic, article_message);
+                publish_message(article_topic, article_message);
 
                 message.finish();
 
               } else {
-
-                log.warn({ tweet_id, url_object }, 'Article is empty.');
+                stats.increment('${topic}.${channel}.error.article_empty');
+                log.error({ tweet_id, url_object, article }, 'Article is empty.');
                 // requeue message in case transient issues are responsible for empty Article
-                message.requeue(null, true);
+                // DO NOT treat the requeue as an error ## https://github.com/dudleycarr/nsqjs#message
+                message.requeue(null, false);
 
               }// if-else
             }).catch(function(err)  {
@@ -151,7 +152,8 @@ export function process_urls() {
               duration = start - end;
               stats.histogram('get_article.tweet_urls.process.catch', duration);
 
-              log.error({err, tweet_id, expanded_url});
+              stats.increment('${topic}.${channel}.error.get_request');
+              log.error({err, tweet_id, expanded_url}, 'Error executing get_article API request');
               message.finish();
               // message.requeue(null, true);
 
