@@ -1,4 +1,5 @@
 from newspaper import Article
+from logging import loggly
 
 def article_handler(url=None, nlp=False):
     response = {
@@ -17,32 +18,32 @@ def article_handler(url=None, nlp=False):
     }
 
     if not url:
-        print("Empty URL...")
+        loggly.error("Cannot parse empty URL")
         return response
     ## if
     try:
         article = Article(url)
         if not article.is_downloaded:
-            print("Downloading article...")
+            loggly.info("Downloading article: '%s'", url)
             article.download()
         ##if
 
         response['html'] = article.html
 
         if not article.is_parsed:
-            print("Parsing article...")
+            loggly.info("Parsing article: '%s'", url)
             article.parse()
         ##if
 
         response['title'] = article.title
 
         if article.has_top_image() is True:
-            print("Getting top_image...")
+            loggly.info("Getting top_image: : '%s'", url)
             response['top_image'] = article.top_image
         ##if-else
 
         if nlp is True:
-            print("Doing NLP processing...")
+            loggly.info("Doing NLP processing: '%s'", url)
             article.nlp()
             response['summary'] = article.summary
             response['keywords'] = article.keywords
@@ -58,7 +59,7 @@ def article_handler(url=None, nlp=False):
 
         return response
     except Exception as e:
-        print(e)
+        loggly.error(e)
         return response
     ##try-except
 ##article_handler
