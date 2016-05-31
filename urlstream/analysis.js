@@ -48,14 +48,14 @@ export function process_tweets() {
     const tweet = message.json();
     const tweet_id = tweet.id_str;
 
-    const topic = process.env.TWEET_URLS_TOPIC;
+    const tweet_urls_topic = process.env.TWEET_URLS_TOPIC;
 
     log.debug({tweet_id, tweet}, 'Tweet message object');
 
     tweet.entities.urls.forEach((url) => {
       if(url) {
-        log.info({topic, tweet_id, url}, 'Publishing urls in tweet');
-        publish_message(topic, {
+        log.info({tweet_urls_topic, tweet_id, url}, 'Publishing urls in tweet');
+        publish_message(tweet_urls_topic, {
           tweet_id: tweet_id,
           urls: url
         });// publish_message
@@ -81,11 +81,11 @@ export function process_urls() {
     const url_object = message_object.url || message_object.urls || {}; // FIXME TODO check for empty url object
     const expanded_url = url_object.expanded_url || null; // FIXME TODO check for empty url object
 
-    log.debug({tweet_id, url_object}, 'Urls message object');
+    log.debug({topic, channel, tweet_id, url_object}, 'Urls message object');
 
     if(!expanded_url)  {
       stats.increment('${topic}.${channel}.error.expanded_url');
-      log.error({tweet_id, url_object}, "Missing a valid expanded_url object in message");
+      log.error({topic, channel, tweet_id, url_object}, "Missing a valid expanded_url object in message");
       message.finish();
       return;
     }//if
@@ -106,7 +106,7 @@ export function process_urls() {
         const child_urls = child.val() || {};
         if(child_urls && (expanded_url !== child_urls.expanded_url))  {
 
-          log.info({expanded_url, child_urls}, "Article NOT found in Firebase. Creating one...");
+          log.info({topic, channel, expanded_url, child_urls}, "Article NOT found in Firebase. Creating one...");
 
           // https://github.com/dudleycarr/nsqjs#message
           // Tell nsqd that you want extra time to process the message. It extends the soft timeout by the normal timeout amount.
@@ -126,13 +126,15 @@ export function process_urls() {
                 const article_message = { tweet_id, expanded_url, article };
 
                 log.info({
+                  topic,
+                  channel,
                   tweet_id,
                   expanded_url,
                   article_title: article.title,
                   source_url: article.source_url
                 }, 'Article metadata');
 
-                log.debug({ article_message }, 'Article message');
+                log.debug({ topic, channel, article_message }, 'Article message');
                 log.info({article_topic, tweet_id, expanded_url}, 'Publishing Article related to url.');
 
                 publish_message(article_topic, article_message);
@@ -141,7 +143,7 @@ export function process_urls() {
 
               } else {
                 stats.increment('${topic}.${channel}.error.article_empty');
-                log.error({ tweet_id, url_object, article }, 'Article is empty.');
+                log.error({ topic, channel, tweet_id, url_object, article }, 'Article is empty.');
                 // requeue message in case transient issues are responsible for empty Article
                 // DO NOT treat the requeue as an error ## https://github.com/dudleycarr/nsqjs#message
                 message.requeue(null, false);
@@ -153,12 +155,12 @@ export function process_urls() {
               stats.histogram('get_article.tweet_urls.process.catch', duration);
 
               stats.increment('${topic}.${channel}.error.get_request');
-              log.error({err, tweet_id, expanded_url}, 'Error executing get_article API request');
+              log.error({topic, channel, err, tweet_id, expanded_url}, 'Error executing get_article API request');
               message.finish();
 
             });// get_article
         } else {
-          log.info({expanded_url, child_urls}, "Article FOUND in Firebase.");
+          log.info({topic, channel, expanded_url, child_urls}, "Article FOUND in Firebase.");
           message.finish();
         }// if-else
       });//Articles.child`
@@ -183,7 +185,7 @@ export function save_urls() {
 
     if(!expanded_url)  {
       stats.increment('${topic}.${channel}.error.expanded_url');
-      log.error({tweet_id, url_object}, "Missing a valid expanded_url object in message");
+      log.error({topic, channel, tweet_id, url_object}, "Missing a valid expanded_url object in message");
       message.finish();
       return;
     }//if
@@ -196,14 +198,14 @@ export function save_urls() {
       duration = start - end;
       stats.histogram('firebase.urls.push.tweet_urls.save.then', duration);
 
-      log.info({tweet_id, url_object, firebase_key: value.key}, 'Tweet URL object saved.');
+      log.info({topic, channel, tweet_id, url_object, firebase_key: value.key}, 'Tweet URL object saved.');
       message.finish();
     }).catch(function(err)  {
       end = now();
       duration = start - end;
       stats.histogram('firebase.urls.push.tweet_urls.save.catch', duration);
 
-      log.error({err, tweet_id, url_object});
+      log.error({topic, channel, err, tweet_id, url_object});
     });// Urls.child
 
   }// on_url
@@ -238,7 +240,7 @@ export function save_articles() {
     const expanded_url = message_object.expanded_url;
     const article = message_object.article;
 
-    log.debug({tweet_id, expanded_url}, 'Article related to url.');
+    log.debug({topic, channel, tweet_id, expanded_url}, 'Article related to url.');
 
     const {
       publish_date,
@@ -272,16 +274,14 @@ export function save_articles() {
       end = now();
       duration = start - end;
       stats.histogram('firebase.articles.push.articles.save.then', duration);
-
       stats.increment('${topic}.${channel}.firebase.article.save');
-      log.info({tweet_id, expanded_url, firebase_key: value.key}, 'Article object saved.');
+      log.info({topic, channel, tweet_id, expanded_url, firebase_key: value.key}, 'Article object saved.');
       message.finish();
     }).catch(function(err)  {
       end = now();
       duration = start - end;
       stats.histogram('firebase.articles.push.articles.save.catch', duration);
-
-      log.error({err, tweet_id, article_object});
+      log.error({topic, channel, err, tweet_id, article_object});
       message.finish();
     });// Articles.child
   }// on_article
@@ -290,7 +290,7 @@ export function save_articles() {
 function on_discard_message(message)  {
   const topic = process.env.DISCARDED_MESSAGES_TOPIC;
   stats.increment('${topic}.message_discard');
-  log.warn({topic}, 'Publishing Message DISCARD event.');
+  log.warn({topic, num_attempts: message.attempts}, 'Publishing Message DISCARD event.');
   publish_message(topic, message.json());
 }// on_discard_message
 
