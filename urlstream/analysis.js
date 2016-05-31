@@ -81,7 +81,7 @@ export function process_urls() {
     const url_object = message_object.url || message_object.urls || {}; // FIXME TODO check for empty url object
     const expanded_url = url_object.expanded_url || null; // FIXME TODO check for empty url object
 
-    log.info({topic, channel, tweet_id, url_object}, 'Urls message object');
+    log.debug({topic, channel, tweet_id, url_object}, 'Urls message object');
 
     if(!expanded_url)  {
       stats.increment('${topic}.${channel}.error.expanded_url');
@@ -97,7 +97,7 @@ export function process_urls() {
     // if not, create an Article from these urls and publish a message
     Articles.child(tweet_id).orderByChild("expanded_url").equalTo(expanded_url).once("value").then(function(snapshot)  {
       end = now();
-      duration = start - end;
+      duration = end - start;
       stats.histogram('firebase.articles.equalTo.tweet_urls.process', duration);
 
       const value = snapshot.val();
@@ -115,7 +115,7 @@ export function process_urls() {
         get_article(expanded_url)
           .then(function(article)  {
             end = now();
-            duration = start - end;
+            duration = end - start;
             stats.histogram('get_article.tweet_urls.process.then', duration);
 
             if(article) {
@@ -147,7 +147,7 @@ export function process_urls() {
             }// if-else
           }).catch(function(err)  {
             end = now();
-            duration = start - end;
+            duration = end - start;
             stats.histogram('get_article.tweet_urls.process.catch', duration);
 
             stats.increment('${topic}.${channel}.error.get_request');
@@ -156,7 +156,7 @@ export function process_urls() {
 
           });// get_article
       } else {
-        log.info({topic, channel, expanded_url, value}, "Article FOUND in Firebase.");
+        log.info({topic, channel, expanded_url}, "Article FOUND in Firebase.");
         message.finish();
       }// if-else
     });//Articles.child`
@@ -199,14 +199,14 @@ export function save_urls() {
 
         Urls.child(tweet_id).push(url_object).then(function(value) {
           end = now();
-          duration = start - end;
+          duration = end - start;
           stats.histogram('firebase.urls.push.tweet_urls.save.then', duration);
 
           log.info({topic, channel, tweet_id, url_object, firebase_key: value.key}, 'Tweet URL object saved.');
           message.finish();
         }).catch(function(err)  {
           end = now();
-          duration = start - end;
+          duration = end - start;
           stats.histogram('firebase.urls.push.tweet_urls.save.catch', duration);
 
           log.error({topic, channel, err, tweet_id, url_object});
@@ -279,14 +279,14 @@ export function save_articles() {
 
     Articles.child(tweet_id).push(article_object).then(function(value) {
       end = now();
-      duration = start - end;
+      duration = end - start;
       stats.histogram('firebase.articles.push.articles.save.then', duration);
       stats.increment('${topic}.${channel}.firebase.article.save');
       log.info({topic, channel, tweet_id, expanded_url, firebase_key: value.key}, 'Article object saved.');
       message.finish();
     }).catch(function(err)  {
       end = now();
-      duration = start - end;
+      duration = end - start;
       stats.histogram('firebase.articles.push.articles.save.catch', duration);
       log.error({topic, channel, err, tweet_id, article_object});
       message.finish();
