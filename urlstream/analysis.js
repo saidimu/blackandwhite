@@ -95,75 +95,71 @@ export function process_urls() {
 
     // check if an Article with this url already exists in Firebase
     // if not, create an Article from these urls and publish a message
-    Articles.child(tweet_id)
-      .orderByChild("expanded_url")
-      .equalTo(expanded_url)
-      .on("child_changed", function(child) {
-        end = now();
-        duration = start - end;
-        stats.histogram('firebase.articles.equalTo.tweet_urls.process', duration);
+    Articles.child(tweet_id).orderByChild("expanded_url").equalTo(expanded_url).once("value").then(function(snapshot)  {
+      end = now();
+      duration = start - end;
+      stats.histogram('firebase.articles.equalTo.tweet_urls.process', duration);
 
-        const child_urls = child.val() || {};
-        if(child_urls && (expanded_url !== child_urls.expanded_url))  {
+      const value = snapshot.val();
+      if(!value)  {
+        log.info({topic, channel, expanded_url, value}, "Article NOT found in Firebase. Creating one...");
 
-          log.info({topic, channel, expanded_url, child_urls}, "Article NOT found in Firebase. Creating one...");
+        // https://github.com/dudleycarr/nsqjs#message
+        // Tell nsqd that you want extra time to process the message. It extends the soft timeout by the normal timeout amount.
+        message.touch();
 
-          // https://github.com/dudleycarr/nsqjs#message
-          // Tell nsqd that you want extra time to process the message. It extends the soft timeout by the normal timeout amount.
-          message.touch();
+        const article_topic = process.env.ARTICLES_TOPIC;
 
-          const article_topic = process.env.ARTICLES_TOPIC;
+        start = now();
 
-          start = now();
+        get_article(expanded_url)
+          .then(function(article)  {
+            end = now();
+            duration = start - end;
+            stats.histogram('get_article.tweet_urls.process.then', duration);
 
-          get_article(expanded_url)
-            .then(function(article)  {
-              end = now();
-              duration = start - end;
-              stats.histogram('get_article.tweet_urls.process.then', duration);
+            if(article) {
+              const article_message = { tweet_id, expanded_url, article };
 
-              if(article) {
-                const article_message = { tweet_id, expanded_url, article };
+              log.info({
+                topic,
+                channel,
+                tweet_id,
+                expanded_url,
+                article_title: article.title,
+                source_url: article.source_url
+              }, 'Article metadata');
 
-                log.info({
-                  topic,
-                  channel,
-                  tweet_id,
-                  expanded_url,
-                  article_title: article.title,
-                  source_url: article.source_url
-                }, 'Article metadata');
+              log.debug({ topic, channel, article_message }, 'Article message');
+              log.info({article_topic, tweet_id, expanded_url}, 'Publishing Article related to url.');
 
-                log.debug({ topic, channel, article_message }, 'Article message');
-                log.info({article_topic, tweet_id, expanded_url}, 'Publishing Article related to url.');
+              publish_message(article_topic, article_message);
 
-                publish_message(article_topic, article_message);
-
-                message.finish();
-
-              } else {
-                stats.increment('${topic}.${channel}.error.article_empty');
-                log.error({ topic, channel, tweet_id, url_object, article }, 'Article is empty.');
-                // requeue message in case transient issues are responsible for empty Article
-                // DO NOT treat the requeue as an error ## https://github.com/dudleycarr/nsqjs#message
-                message.requeue(null, false);
-
-              }// if-else
-            }).catch(function(err)  {
-              end = now();
-              duration = start - end;
-              stats.histogram('get_article.tweet_urls.process.catch', duration);
-
-              stats.increment('${topic}.${channel}.error.get_request');
-              log.error({topic, channel, err, tweet_id, expanded_url}, 'Error executing get_article API request');
               message.finish();
 
-            });// get_article
-        } else {
-          log.info({topic, channel, expanded_url, child_urls}, "Article FOUND in Firebase.");
-          message.finish();
-        }// if-else
-      });//Articles.child`
+            } else {
+              stats.increment('${topic}.${channel}.error.article_empty');
+              log.error({ topic, channel, tweet_id, url_object, article }, 'Article is empty.');
+              // requeue message in case transient issues are responsible for empty Article
+              // DO NOT treat the requeue as an error ## https://github.com/dudleycarr/nsqjs#message
+              message.requeue(null, false);
+
+            }// if-else
+          }).catch(function(err)  {
+            end = now();
+            duration = start - end;
+            stats.histogram('get_article.tweet_urls.process.catch', duration);
+
+            stats.increment('${topic}.${channel}.error.get_request');
+            log.error({topic, channel, err, tweet_id, expanded_url}, 'Error executing get_article API request');
+            message.finish();
+
+          });// get_article
+      } else {
+        log.info({topic, channel, expanded_url, value}, "Article FOUND in Firebase.");
+        message.finish();
+      }// if-else
+    });//Articles.child`
 
   }// on_url
 }// process_urls
@@ -281,7 +277,7 @@ export function save_articles() {
     var start = now();
     var end, duration;
 
-    return Articles.child(tweet_id).push(article_object).then(function(value) {
+    Articles.child(tweet_id).push(article_object).then(function(value) {
       end = now();
       duration = start - end;
       stats.histogram('firebase.articles.push.articles.save.then', duration);
