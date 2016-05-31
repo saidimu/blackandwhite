@@ -81,7 +81,7 @@ export function process_urls() {
     const url_object = message_object.url || message_object.urls || {}; // FIXME TODO check for empty url object
     const expanded_url = url_object.expanded_url || null; // FIXME TODO check for empty url object
 
-    log.debug({topic, channel, tweet_id, url_object}, 'Urls message object');
+    log.info({topic, channel, tweet_id, url_object}, 'Urls message object');
 
     if(!expanded_url)  {
       stats.increment('${topic}.${channel}.error.expanded_url');
