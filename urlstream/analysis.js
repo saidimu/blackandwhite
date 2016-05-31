@@ -155,7 +155,6 @@ export function process_urls() {
               stats.increment('${topic}.${channel}.error.get_request');
               log.error({err, tweet_id, expanded_url}, 'Error executing get_article API request');
               message.finish();
-              // message.requeue(null, true);
 
             });// get_article
         } else {
@@ -168,14 +167,13 @@ export function process_urls() {
 }// process_urls
 
 export function save_urls() {
-  init_reader(
-    process.env.TWEET_URLS_TOPIC,
-    process.env.TWEET_URLS_SAVE_CHANNEL,
-    {
-      message: on_url,
-      discard: on_discard_message
-    }
-  );// init_reader
+  const topic = process.env.TWEET_URLS_TOPIC;
+  const channel = process.env.TWEET_URLS_SAVE_CHANNEL;
+
+  init_reader(topic, channel, {
+    message: on_url,
+    discard: on_discard_message
+  });// init_reader
 
   function on_url(message)  {
     const message_object = message.json();
@@ -184,6 +182,7 @@ export function save_urls() {
     const expanded_url = url_object.expanded_url || null; // FIXME TODO check for empty url object
 
     if(!expanded_url)  {
+      stats.increment('${topic}.${channel}.error.expanded_url');
       log.error({tweet_id, url_object}, "Missing a valid expanded_url object in message");
       message.finish();
       return;
@@ -211,14 +210,13 @@ export function save_urls() {
 }// save_urls
 
 export function process_articles() {
-  init_reader(
-    process.env.ARTICLES_TOPIC,
-    process.env.ARTICLES_PROCESS_CHANNEL,
-    {
-      message: on_article,
-      discard: on_discard_message
-    }
-  );// init_reader
+  const topic = process.env.ARTICLES_TOPIC;
+  const channel = process.env.ARTICLES_PROCESS_CHANNEL;
+
+  init_reader(topic, channel, {
+    message: on_article,
+    discard: on_discard_message
+  });// init_reader
 
   function on_article(message)  {
     console.log(message.id);
@@ -226,14 +224,13 @@ export function process_articles() {
 }// process_articles
 
 export function save_articles() {
-  init_reader(
-    process.env.ARTICLES_TOPIC,
-    process.env.ARTICLES_SAVE_CHANNEL,
-    {
-      message: on_article,
-      discard: on_discard_message
-    }
-  );// init_reader
+  const topic = process.env.ARTICLES_TOPIC;
+  const channel = process.env.ARTICLES_SAVE_CHANNEL;
+
+  init_reader(topic, channel, {
+    message: on_article,
+    discard: on_discard_message
+  });// init_reader
 
   function on_article(message)  {
     const message_object = message.json();
@@ -276,6 +273,7 @@ export function save_articles() {
       duration = start - end;
       stats.histogram('firebase.articles.push.articles.save.then', duration);
 
+      stats.increment('${topic}.${channel}.firebase.article.save');
       log.info({tweet_id, expanded_url, firebase_key: value.key}, 'Article object saved.');
       message.finish();
     }).catch(function(err)  {
@@ -291,6 +289,7 @@ export function save_articles() {
 
 function on_discard_message(message)  {
   const topic = process.env.DISCARDED_MESSAGES_TOPIC;
+  stats.increment('${topic}.message_discard');
   log.warn({topic}, 'Publishing Message DISCARD event.');
   publish_message(topic, message.json());
 }// on_discard_message
@@ -300,6 +299,7 @@ function get_article(expanded_url)  {
   log.info({link_hostname});
 
   if(IGNORE_HOSTNAMES.includes(link_hostname)) {
+    stats.increment('get_article.warn.ignore_hostname');
     log.warn({
       link_hostname,
       ignore_hostnames: IGNORE_HOSTNAMES
@@ -308,6 +308,7 @@ function get_article(expanded_url)  {
   }//if
 
   if(expanded_url) {
+    stats.increment('get_article.info.fetch_article');
     log.info({expanded_url}, 'Fetching Article for url.');
     return fetch(`${endpoint}?url=${expanded_url}`)
       .then(function(response)  {
@@ -316,6 +317,7 @@ function get_article(expanded_url)  {
         return json;
       });// fetch
   } else {
+    stats.increment('get_article.error.invalid_url');
     log.error({expanded_url}, 'Not a valid url');
     return null;
   }// if-else
