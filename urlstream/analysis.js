@@ -181,6 +181,7 @@ export function save_urls() {
     const message_object = message.json();
     const tweet_id = message_object.tweet_id;
     const url_object = message_object.url || message_object.urls || {}; // FIXME TODO check for empty url object
+    const twitter_short_url = url_object.url || null; // FIXME TODO check for empty url object
     const expanded_url = url_object.expanded_url || null; // FIXME TODO check for empty url object
 
     if(!expanded_url)  {
@@ -193,20 +194,30 @@ export function save_urls() {
     var start = now();
     var end, duration;
 
-    Urls.child(tweet_id).push(url_object).then(function(value) {
-      end = now();
-      duration = start - end;
-      stats.histogram('firebase.urls.push.tweet_urls.save.then', duration);
+    // find existing url (the twitter short link)
+    // else create a new Urls object
+    // the assumption is the same tweet cannot have multiple identical 'twitter short links' (t.co)
+    Urls.child(tweet_id).orderByChild("url").equalTo(twitter_short_url).once("value").then(function(snapshot)  {
+      const value = snapshot.val();
+      if(!value)  {
 
-      log.info({topic, channel, tweet_id, url_object, firebase_key: value.key}, 'Tweet URL object saved.');
-      message.finish();
-    }).catch(function(err)  {
-      end = now();
-      duration = start - end;
-      stats.histogram('firebase.urls.push.tweet_urls.save.catch', duration);
+        Urls.child(tweet_id).push(url_object).then(function(value) {
+          end = now();
+          duration = start - end;
+          stats.histogram('firebase.urls.push.tweet_urls.save.then', duration);
 
-      log.error({topic, channel, err, tweet_id, url_object});
-    });// Urls.child
+          log.info({topic, channel, tweet_id, url_object, firebase_key: value.key}, 'Tweet URL object saved.');
+          message.finish();
+        }).catch(function(err)  {
+          end = now();
+          duration = start - end;
+          stats.histogram('firebase.urls.push.tweet_urls.save.catch', duration);
+
+          log.error({topic, channel, err, tweet_id, url_object});
+        });// Urls.child
+
+      }//if
+    });//Urls.child
 
   }// on_url
 }// save_urls
