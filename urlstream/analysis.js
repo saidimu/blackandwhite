@@ -27,6 +27,10 @@ import {
   TopImages
 } from './datastore.js';
 
+import {
+  get_emotion_api_token
+} from './ratelimit.js';
+
 init_writer();
 
 const IGNORE_HOSTNAMES = process.env.IGNORE_HOSTNAMES.split(',') || [];
@@ -277,45 +281,72 @@ export function process_articles() {
         start = now();
 
         const emotion_api_options = { url: top_image_url };
-        analyze_emotion(emotion_api_options).then(function(emotions_object)  {
-          end = now();
-          duration = end - start;
-          stats.histogram('analyze_emotion.top_image_url.process.then', duration);
+        const emotion_api = function()  {
+          analyze_emotion(emotion_api_options).then(function(emotions_object)  {
+            end = now();
+            duration = end - start;
+            stats.histogram('analyze_emotion.top_image_url.process.then', duration);
 
-          start = now();
+            start = now();
 
-          if(emotions_object) {
-            // create new TopImages Firebase object
-            TopImages.child(tweet_id).push({expanded_url, top_image_url, emotions_object}).then(function(value) {
-              end = now();
-              duration = end - start;
-              stats.histogram('firebase.articles.push.top_images.save.then', duration);
-              stats.increment('${topic}.${channel}.firebase.top_images.save');
-              log.info({topic, channel, tweet_id, top_image_url, firebase_key: value.key}, 'TopImage object saved.');
+            if(emotions_object) {
+              // create new TopImages Firebase object
+              TopImages.child(tweet_id).push({expanded_url, top_image_url, emotions_object}).then(function(value) {
+                end = now();
+                duration = end - start;
+                stats.histogram('firebase.articles.push.top_images.save.then', duration);
+                stats.increment('${topic}.${channel}.firebase.top_images.save');
+                log.info({topic, channel, tweet_id, top_image_url, firebase_key: value.key}, 'TopImage object saved.');
+                message.finish();
+              }).catch(function(err)  {
+                end = now();
+                duration = end - start;
+                stats.histogram('firebase.articles.push.top_images.save.catch', duration);
+                log.error({topic, channel, err, tweet_id, emotions_object});
+                message.finish();
+              });// TopImages.child
+
+            } else {
+              stats.increment('${topic}.${channel}.empty.analyze_emotion');
+              log.info({topic, channel, tweet_id, top_image_url, expanded_url}, 'Error. Empty analyze_emotion API response');
               message.finish();
-            }).catch(function(err)  {
-              end = now();
-              duration = end - start;
-              stats.histogram('firebase.articles.push.top_images.save.catch', duration);
-              log.error({topic, channel, err, tweet_id, emotions_object});
-              message.finish();
-            });// TopImages.child
+            }// if-else
 
-          } else {
-            stats.increment('${topic}.${channel}.empty.analyze_emotion');
-            log.info({topic, channel, tweet_id, top_image_url, expanded_url}, 'Error. Empty analyze_emotion API response');
+          }).catch(function(err)  {
+            end = now();
+            duration = end - start;
+            stats.histogram('analyze_emotion.top_image_url.process.catch', duration);
+
+            stats.increment('${topic}.${channel}.error.analyze_emotion');
+            log.error({topic, channel, err, tweet_id, top_image_url, expanded_url}, 'Error executing analyze_emotion API request');
             message.finish();
+          });// analyze_emotion
+
+        };// emotion_api
+
+        get_emotion_api_token(function (err, response) {
+          if(err) {
+            log.error({err, topic, channel, tweet_id, top_image_url, expanded_url}, 'Error getting Emotion API tokens from the rate-limiter');
+          } else if(response.conformant) {
+            emotion_api();
+          } else {
+            const reset_timestamp = response.reset;
+            const message_delay_in_seconds = (
+              (reset_timestamp * 1000) - Date.now()
+            ) / 1000;
+            log.info({
+              message_delay_in_seconds,
+              reset_timestamp,
+              topic,
+              channel,
+              tweet_id,
+              top_image_url,
+              expanded_url
+            }, 'Emotion API tokens: not enough tokens from the rate-limiter');
+            // https://github.com/dudleycarr/nsqjs#message
+            message.requeue(message_delay_in_seconds, false);
           }// if-else
-
-        }).catch(function(err)  {
-          end = now();
-          duration = end - start;
-          stats.histogram('analyze_emotion.top_image_url.process.catch', duration);
-
-          stats.increment('${topic}.${channel}.error.analyze_emotion');
-          log.error({topic, channel, err, tweet_id, top_image_url, expanded_url}, 'Error executing analyze_emotion API request');
-          message.finish();
-        });// analyze_emotion
+        });// get_emotion_api_token
 
       } else {
         log.info({topic, channel, top_image_url, expanded_url}, "TopImage FOUND in Firebase.");
