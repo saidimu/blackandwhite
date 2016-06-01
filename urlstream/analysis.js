@@ -284,21 +284,28 @@ export function process_articles() {
 
           start = now();
 
-          // create new TopImages Firebase object
-          TopImages.child(tweet_id).push({expanded_url, top_image_url, emotions_object}).then(function(value) {
-            end = now();
-            duration = end - start;
-            stats.histogram('firebase.articles.push.top_images.save.then', duration);
-            stats.increment('${topic}.${channel}.firebase.top_images.save');
-            log.info({topic, channel, tweet_id, top_image_url, firebase_key: value.key}, 'TopImage object saved.');
+          if(emotions_object) {
+            // create new TopImages Firebase object
+            TopImages.child(tweet_id).push({expanded_url, top_image_url, emotions_object}).then(function(value) {
+              end = now();
+              duration = end - start;
+              stats.histogram('firebase.articles.push.top_images.save.then', duration);
+              stats.increment('${topic}.${channel}.firebase.top_images.save');
+              log.info({topic, channel, tweet_id, top_image_url, firebase_key: value.key}, 'TopImage object saved.');
+              message.finish();
+            }).catch(function(err)  {
+              end = now();
+              duration = end - start;
+              stats.histogram('firebase.articles.push.top_images.save.catch', duration);
+              log.error({topic, channel, err, tweet_id, emotions_object});
+              message.finish();
+            });// TopImages.child
+
+          } else {
+            stats.increment('${topic}.${channel}.empty.analyze_emotion');
+            log.info({topic, channel, tweet_id, top_image_url, expanded_url}, 'Error. Empty analyze_emotion API response');
             message.finish();
-          }).catch(function(err)  {
-            end = now();
-            duration = end - start;
-            stats.histogram('firebase.articles.push.top_images.save.catch', duration);
-            log.error({topic, channel, err, tweet_id, emotions_object});
-            message.finish();
-          });// TopImages.child
+          }// if-else
 
         }).catch(function(err)  {
           end = now();
