@@ -371,20 +371,25 @@ export function save_articles() {
     var start = now();
     var end, duration;
 
-    Articles.child(tweet_id).push(article_object).then(function(value) {
-      end = now();
-      duration = end - start;
-      stats.histogram('firebase.articles.push.articles.save.then', duration);
-      stats.increment('${topic}.${channel}.firebase.article.save');
-      log.info({topic, channel, tweet_id, expanded_url, firebase_key: value.key}, 'Article object saved.');
+    try {
+      Articles.child(tweet_id).push(article_object).then(function(value) {
+        end = now();
+        duration = end - start;
+        stats.histogram('firebase.articles.push.articles.save.then', duration);
+        stats.increment('${topic}.${channel}.firebase.article.save');
+        log.info({topic, channel, tweet_id, expanded_url, firebase_key: value.key}, 'Article object saved.');
+        message.finish();
+      }).catch(function(err)  {
+        end = now();
+        duration = end - start;
+        stats.histogram('firebase.articles.push.articles.save.catch', duration);
+        log.error({topic, channel, err, tweet_id, article_object});
+        message.finish();
+      });// Articles.child
+    } catch (e) {
       message.finish();
-    }).catch(function(err)  {
-      end = now();
-      duration = end - start;
-      stats.histogram('firebase.articles.push.articles.save.catch', duration);
-      log.error({topic, channel, err, tweet_id, article_object});
-      message.finish();
-    });// Articles.child
+      log.error({e});
+    }// try-catch
   }// on_article
 }// save_articles
 
