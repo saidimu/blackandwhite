@@ -247,7 +247,7 @@ export function process_articles() {
       return;
     }//if
 
-    const top_image_url = article_object.top_image_url || null;
+    const top_image_url = article.top_image_url || null;
 
     if(!top_image_url)  {
       stats.increment('${topic}.${channel}.error.top_image_url');
