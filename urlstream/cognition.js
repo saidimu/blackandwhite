@@ -1,7 +1,7 @@
 const oxford = require('project-oxford');
 
-export const face_client = oxford(process.env.MICROSOFT_FACE_API_KEY);
-export const emotion_client = oxford(process.env.MICROSOFT_EMOTION_API_KEY);
+export const face_client = new oxford.Client(process.env.MICROSOFT_FACE_API_KEY);
+export const emotion_client = new oxford.Client(process.env.MICROSOFT_EMOTION_API_KEY);
 
 var path = require('path');
 var appname = path.basename(__filename, '.js');
