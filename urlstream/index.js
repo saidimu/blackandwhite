@@ -30,5 +30,5 @@ get_tweet_stream((tweet) => {
 process_tweets();
 process_urls();
 save_urls();
-// process_articles();
+process_articles();
 save_articles();
