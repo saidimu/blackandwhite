@@ -18,8 +18,13 @@ import {
 } from './statsd.js';
 
 import {
+  analyze_emotion
+} from './cognition.js';
+
+import {
   Urls,
-  Articles
+  Articles,
+  TopImages
 } from './datastore.js';
 
 init_writer();
@@ -228,7 +233,89 @@ export function process_articles() {
   });// init_reader
 
   function on_article(message)  {
-    console.log(message.id);
+    const article_object = message.json();
+    const tweet_id = article_object.tweet_id;
+    const article = article_object.article || null;
+    const expanded_url = article_object.expanded_url || null;
+
+    log.debug({topic, channel, tweet_id, article_keys: Object.keys(article)}, 'Article message object');
+
+    if(!article)  {
+      stats.increment('${topic}.${channel}.error.empty_article');
+      log.error({topic, channel, tweet_id, article}, "Empty Article object in message");
+      message.finish();
+      return;
+    }//if
+
+    const top_image_url = article_object.top_image_url || null;
+
+    if(!top_image_url)  {
+      stats.increment('${topic}.${channel}.error.top_image_url');
+      log.error({topic, channel, tweet_id}, "Empty top_image_url object in message");
+      message.finish();
+      return;
+    }//if
+
+    var start = now();
+    var end, duration;
+
+    // check if a TopImages object with this url already exists in Firebase
+    // else create a new TopImages object
+    TopImages.child(tweet_id).orderByChild("top_image_url").equalTo(top_image_url).once("value").then(function(snapshot)  {
+      end = now();
+      duration = end - start;
+      stats.histogram('firebase.top_images.equalTo.top_image_url.process', duration);
+
+      const value = snapshot.val();
+      if(!value)  {
+        log.info({topic, channel, top_image_url, expanded_url, value}, "TopImage NOT found in Firebase. Creating one...");
+
+        // https://github.com/dudleycarr/nsqjs#message
+        // Tell nsqd that you want extra time to process the message. It extends the soft timeout by the normal timeout amount.
+        message.touch();
+
+        start = now();
+
+        const emotion_api_options = { url: top_image_url };
+        analyze_emotion(emotion_api_options).then(function(emotions_object)  {
+          end = now();
+          duration = end - start;
+          stats.histogram('analyze_emotion.top_image_url.process.then', duration);
+
+          start = now();
+
+          // create new TopImages Firebase object
+          TopImages.child(tweet_id).push({expanded_url, top_image_url, emotions_object}).then(function(value) {
+            end = now();
+            duration = end - start;
+            stats.histogram('firebase.articles.push.top_images.save.then', duration);
+            stats.increment('${topic}.${channel}.firebase.top_images.save');
+            log.info({topic, channel, tweet_id, top_image_url, firebase_key: value.key}, 'TopImage object saved.');
+            message.finish();
+          }).catch(function(err)  {
+            end = now();
+            duration = end - start;
+            stats.histogram('firebase.articles.push.top_images.save.catch', duration);
+            log.error({topic, channel, err, tweet_id, emotions_object});
+            message.finish();
+          });// TopImages.child
+
+        }).catch(function(err)  {
+          end = now();
+          duration = end - start;
+          stats.histogram('analyze_emotion.top_image_url.process.catch', duration);
+
+          stats.increment('${topic}.${channel}.error.analyze_emotion');
+          log.error({topic, channel, err, tweet_id, top_image_url, expanded_url}, 'Error executing analyze_emotion API request');
+          message.finish();
+        });// analyze_emotion
+
+      } else {
+        log.info({topic, channel, top_image_url, expanded_url}, "TopImage FOUND in Firebase.");
+        message.finish();
+      }// if-else
+    });//TopImages.child`
+
   }// on_article
 }// process_articles
 
