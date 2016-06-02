@@ -331,9 +331,8 @@ export function process_articles() {
             emotion_api();
           } else {
             const reset_timestamp = response.reset;
-            const message_delay_in_seconds = (
-              (reset_timestamp * 1000) - Date.now()
-            ) / 1000;
+            const message_delay_in_milliseconds = (reset_timestamp * 1000) - Date.now();
+            const message_delay_in_seconds = parseInt(message_delay_in_milliseconds / 1000);
             log.info({
               message_delay_in_seconds,
               reset_timestamp,
@@ -343,8 +342,23 @@ export function process_articles() {
               top_image_url,
               expanded_url
             }, 'Emotion API tokens: not enough tokens from the rate-limiter');
+
+            // Requeue the messsage until the time tokens are available
             // https://github.com/dudleycarr/nsqjs#message
             message.requeue(message_delay_in_seconds, false);
+
+            log.info({topic, channel, message_delay_in_seconds}, 'Pausing the NSQ Reader after being rate-limited.');
+
+            // Pause the channel until the time tokens are available
+            // https://github.com/dudleycarr/nsqjs#new-readertopic-channel-options
+            init_reader.ispause();
+
+            // Unpause the channel after tokens are available
+            setTimeout(() => {
+              log.info({topic, channel, message_delay_in_milliseconds}, 'Unpausing the NSQ Reader after being rate-limited.');
+              init_reader.unpause();
+            }, message_delay_in_milliseconds);
+
           }// if-else
         });// get_emotion_api_token
 
