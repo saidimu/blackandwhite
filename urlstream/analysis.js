@@ -231,7 +231,7 @@ export function process_articles() {
   const topic = process.env.ARTICLES_TOPIC;
   const channel = process.env.ARTICLES_PROCESS_CHANNEL;
 
-  init_reader(topic, channel, {
+  const process_articles_reader = init_reader(topic, channel, {
     message: on_article,
     discard: on_discard_message
   });// init_reader
@@ -351,12 +351,12 @@ export function process_articles() {
 
             // Pause the channel until the time tokens are available
             // https://github.com/dudleycarr/nsqjs#new-readertopic-channel-options
-            init_reader.pause();
+            process_articles_reader.pause();
 
             // Unpause the channel after tokens are available
             setTimeout(() => {
               log.info({topic, channel, message_delay_in_milliseconds}, 'Unpausing the NSQ Reader after being rate-limited.');
-              init_reader.unpause();
+              process_articles_reader.unpause();
             }, message_delay_in_milliseconds);
 
           }// if-else
