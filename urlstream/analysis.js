@@ -351,7 +351,7 @@ export function process_articles() {
 
             // Pause the channel until the time tokens are available
             // https://github.com/dudleycarr/nsqjs#new-readertopic-channel-options
-            init_reader.ispause();
+            init_reader.pause();
 
             // Unpause the channel after tokens are available
             setTimeout(() => {
