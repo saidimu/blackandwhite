@@ -4,7 +4,7 @@
   "description": "stream urls from twitter",
   "main": "index.js",
   "scripts": {
-    "prestart": "babel analysis.js cognition.js datastore.js firebase.js index.js logging.js messaging.js ratelimit.js statsd.js twitter.js --out-dir dist",
+    "prestart": "babel src --out-dir dist",
     "start": "node dist/index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
