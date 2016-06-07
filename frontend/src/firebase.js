@@ -1,6 +1,6 @@
 import { initializeApp, database } from 'firebase';
 
-const config = require('./firebase.config.json');
+const config = require('./firebase.private.config.json');
 
 initializeApp(config);
 

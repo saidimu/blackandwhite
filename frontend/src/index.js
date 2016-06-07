@@ -7,9 +7,9 @@ import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
 // import darkBaseTheme from 'material-ui/styles/baseThemes/darkBaseTheme';
 import darkBaseTheme from 'material-ui/styles/baseThemes/lightBaseTheme';
 
-import { Card, CardHeader, CardMedia, CardTitle, CardText } from 'material-ui/Card';
 
 import { getTopImages } from './firebase.js';
+import TopImage from '../components/TopImage.js';
 
 class Example extends Component {
   constructor(props) {
@@ -20,9 +20,9 @@ class Example extends Component {
   }// constructor
 
   componentWillMount() {
-    getTopImages(10, (err, topImages) => {
+    getTopImages(5, (err, topImages) => {
       if (!err) {
-        console.log(topImages);
+        // console.log(topImages);
         this.setState({ topImages });
       } else {
         console.error(err);
@@ -35,7 +35,7 @@ class Example extends Component {
 
   render() {
     const topImages = this.state.topImages;
-
+    console.log(topImages);
     return (
       <MuiThemeProvider muiTheme={getMuiTheme(darkBaseTheme)}>
         <div>
@@ -48,40 +48,18 @@ class Example extends Component {
               const tweetUrls = topImages[tweetUrlsKey];
               return Object.keys(tweetUrls).map((urlKey) => {
                 const url = tweetUrls[urlKey];
-                console.log(url.top_image_url);
+                const topImageUrl = url.top_image_url;
+                const faces = url.emotions_object;
+                console.log(topImageUrl);
+                console.log(faces);
                 return (
-                  <Card key={urlKey} >
-                    <CardHeader
-                      title="URL Avatar"
-                      subtitle="Subtitle"
-                      avatar="http://lorempixel.com/100/100/nature/"
-                    />
-                    <CardMedia
-                      overlay={
-                        <CardTitle title="Overlay title" subtitle="Overlay subtitle" />
-                      }
-                    >
-                      <img src={url.top_image_url} role="presentation" />
-                    </CardMedia>
-                    <CardTitle title="Card title" subtitle="Card subtitle" />
-                    <CardText>
-                      {
-                        Object.keys(url.emotions_object || {}).map((faces) => {
-                          const faceObject = url.emotions_object[faces];
-                          console.log(faceObject.scores);
-                          // return faceObject.scores;
-                          return Object.keys(faceObject.scores || {}).map((emotion) => {
-                            const score = faceObject.scores[emotion];
-                            console.log(`${emotion}: ${score}`);
-                            return <h6>{emotion} : {score}</h6>;
-                          });
-                        })
-                      }
-                    </CardText>
-                  </Card>
-                );// return
-              });// forEach
-            })// forEach
+                  <TopImage
+                    url={topImageUrl}
+                    faces={faces}
+                  />
+                );
+              });// Object.keys(tweetUrls)
+            })// Object.keys(topImages)
           }
         </div>
       </MuiThemeProvider>
