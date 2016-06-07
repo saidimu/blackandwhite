@@ -25,7 +25,7 @@ class ArticleTitle extends React.Component {
 
   _renderLoadingIndicator() {
     return (
-      <CircularProgress size={0.5} />
+      <CircularProgress size={0.5} color="#E3F2FD" />
     );// return
   }// _renderLoadingIndicator
 

@@ -25,7 +25,7 @@ class ArticleSource extends React.Component {
 
   _renderLoadingIndicator() {
     return (
-      <CircularProgress size={0.5} />
+      <CircularProgress size={0.5} color="#E3F2FD" />
     );// return
   }// _renderLoadingIndicator
 
@@ -33,7 +33,9 @@ class ArticleSource extends React.Component {
     const { article } = this.state;
 
     if (!article) {
-      return this._renderLoadingIndicator();
+      return (
+        null
+      );
     }// if
 
     return (

@@ -72,6 +72,7 @@ class Example extends Component {
         <div>
           <AppBar
             title="newscuria"
+            zDepth={5}
             iconClassNameRight="muidocs-icon-navigation-expand-more"
           />
           <div style={styles.root}>
