@@ -2,6 +2,8 @@
   "extends": "airbnb",
   "rules":  {
     "react/prefer-stateless-function": 0,
-    "no-console": 0
+    "no-console": 0,
+    "no-iterator": 0,
+    "no-restricted-syntax": [1, "ForInStatement"],
   }
 }
