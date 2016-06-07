@@ -20,7 +20,7 @@ class Example extends Component {
   }// constructor
 
   componentWillMount() {
-    getTopImages(5, (err, topImages) => {
+    getTopImages(25, (err, topImages) => {
       if (!err) {
         // console.log(topImages);
         this.setState({ topImages });
