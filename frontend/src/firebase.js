@@ -19,11 +19,12 @@ export function getTopImages(maxItems, callback) {
 }// getTopImages
 
 export function getArticle(tweetId, callback) {
-  return Articles.child(tweetId).then((article) => {
-    console.log(article);
+  return Articles.child(tweetId).orderByChild('expanded_url').on('child_added', (dataSnapshot) => {
+    const article = dataSnapshot.val();
+    // console.log(article);
     callback(null, article);
-  }).catch((error) => {
-    console.error(error);
-    callback(error, null);
+  // }).catch((error) => {
+  //   console.error(error);
+  //   callback(error, null);
   });// Articles.child
 }// getArticles

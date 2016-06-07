@@ -1,7 +1,9 @@
 import React, { PropTypes } from 'react';
 import { Card, CardHeader, CardMedia, CardTitle, CardText } from 'material-ui/Card';
 
-const TopImage = ({ url, faces }) => (
+import { getArticle } from '../src/firebase.js';
+
+const TopImage = ({ url, faces, tweetId }) => (
   <Card>
     <CardHeader
       title="URL Avatar"
@@ -15,15 +17,18 @@ const TopImage = ({ url, faces }) => (
     >
       <img src={url} role="presentation" />
     </CardMedia>
-    <CardTitle title="Card title" subtitle="Card subtitle" />
+    <CardTitle title={<Title tweetId={tweetId} />} subtitle="Card subtitle" />
     <CardText>
       <Emotions faces={faces} />
+      <Title tweetId={tweetId} />
     </CardText>
   </Card>
 );// TopImage
 
 TopImage.propTypes = {
   url: PropTypes.string.isRequired,
+  faces: PropTypes.array.isRequired,
+  tweetId: PropTypes.string.isRequired,
 };// TopImage.propTypes
 
 const Emotions = ({ faces }) => (
@@ -43,7 +48,27 @@ const Emotions = ({ faces }) => (
 );// Emotions
 
 Emotions.propTypes = {
-  faces: PropTypes.object.isRequired,
-};// TopImage.propTypes
+  faces: PropTypes.array.isRequired,
+};// Emotions.propTypes
+
+const Title = ({ tweetId }) => (
+  <div>
+    {
+      getArticle(tweetId, (err, article) => {
+        if (err) {
+          console.error(err);
+          return null;
+        }// if
+
+        console.log(article.title);
+        return article.title;
+      })
+    }
+  </div>
+);// Title
+
+Title.propTypes = {
+  tweetId: PropTypes.string.isRequired,
+};// Title.propTypes
 
 export default TopImage;

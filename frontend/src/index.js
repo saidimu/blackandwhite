@@ -35,7 +35,7 @@ class Example extends Component {
 
   render() {
     const topImages = this.state.topImages;
-    console.log(topImages);
+
     return (
       <MuiThemeProvider muiTheme={getMuiTheme(darkBaseTheme)}>
         <div>
@@ -44,8 +44,9 @@ class Example extends Component {
             iconClassNameRight="muidocs-icon-navigation-expand-more"
           />
           {
-            Object.keys(topImages).map((tweetUrlsKey) => {
-              const tweetUrls = topImages[tweetUrlsKey];
+            Object.keys(topImages).map((tweetId) => {
+              const tweetUrls = topImages[tweetId];
+              // console.log(tweetId);
               return Object.keys(tweetUrls).map((urlKey) => {
                 const url = tweetUrls[urlKey];
                 const topImageUrl = url.top_image_url;
@@ -55,7 +56,8 @@ class Example extends Component {
                 return (
                   <TopImage
                     url={topImageUrl}
-                    faces={faces}
+                    faces={faces || []}
+                    tweetId={tweetId}
                   />
                 );
               });// Object.keys(tweetUrls)
