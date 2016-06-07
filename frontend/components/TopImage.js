@@ -1,7 +1,8 @@
 import React, { PropTypes } from 'react';
 import { Card, CardHeader, CardMedia, CardTitle, CardText } from 'material-ui/Card';
 
-import { getArticle } from '../src/firebase.js';
+import FaceEmotions from './FaceEmotions.js';
+import ArticleTitle from './ArticleTitle.js';
 
 const TopImage = ({ url, faces, tweetId }) => (
   <Card>
@@ -17,10 +18,10 @@ const TopImage = ({ url, faces, tweetId }) => (
     >
       <img src={url} role="presentation" />
     </CardMedia>
-    <CardTitle title={<Title tweetId={tweetId} />} subtitle="Card subtitle" />
-    <CardText>
-      <Emotions faces={faces} />
-      <Title tweetId={tweetId} />
+    <CardTitle title={<ArticleTitle tweetId={tweetId} />} subtitle="Card subtitle" />
+    <CardText expandable={true} >
+      <FaceEmotions faces={faces} />
+      <ArticleTitle tweetId={tweetId} />
     </CardText>
   </Card>
 );// TopImage
@@ -30,45 +31,5 @@ TopImage.propTypes = {
   faces: PropTypes.array.isRequired,
   tweetId: PropTypes.string.isRequired,
 };// TopImage.propTypes
-
-const Emotions = ({ faces }) => (
-  <div>
-    {
-      Object.keys(faces || {}).map((key) => {
-        const face = faces[key];
-        console.log(face.scores);
-        return Object.keys(face.scores || {}).map((emotion) => {
-          const score = face.scores[emotion];
-          console.log(`${emotion}: ${score}`);
-          return <h6>{emotion} : {score}</h6>;
-        });// Object.keys(face.scores)
-      })// Object.keys(faces)
-    }
-  </div>
-);// Emotions
-
-Emotions.propTypes = {
-  faces: PropTypes.array.isRequired,
-};// Emotions.propTypes
-
-const Title = ({ tweetId }) => (
-  <div>
-    {
-      getArticle(tweetId, (err, article) => {
-        if (err) {
-          console.error(err);
-          return null;
-        }// if
-
-        console.log(article.title);
-        return article.title;
-      })
-    }
-  </div>
-);// Title
-
-Title.propTypes = {
-  tweetId: PropTypes.string.isRequired,
-};// Title.propTypes
 
 export default TopImage;

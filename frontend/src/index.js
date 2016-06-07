@@ -6,12 +6,13 @@ import {
   deepPurple500 as primary1Color,
   deepPurple700 as primary2Color,
 } from 'material-ui/styles/colors';
+import { GridList, GridTile } from 'material-ui/GridList';
 import getMuiTheme from 'material-ui/styles/getMuiTheme';
 import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
 
-
 import { getTopImages } from './firebase.js';
-import TopImage from '../components/TopImage.js';
+import ArticleTitle from '../components/ArticleTitle.js';
+import ArticleSource from '../components/ArticleSource.js';
 
 // http://www.material-ui.com/#/customization/themes
 // https://github.com/callemall/material-ui/blob/master/src/styles/colors.js
@@ -27,6 +28,20 @@ const muiTheme = getMuiTheme({
   },
 });// muiTheme
 
+const styles = {
+  root: {
+    display: 'flex',
+    flexWrap: 'wrap',
+    justifyContent: 'space-around',
+  },
+  gridList: {
+    // width: 800,
+    // height: 500,
+    overflowY: 'auto',
+    marginBottom: 24,
+  },
+};// styles
+
 class Example extends Component {
   constructor(props) {
     super(props);
@@ -36,7 +51,7 @@ class Example extends Component {
   }// constructor
 
   componentWillMount() {
-    getTopImages(25, (err, topImages) => {
+    getTopImages(20, (err, topImages) => {
       if (!err) {
         // console.log(topImages);
         this.setState({ topImages });
@@ -59,26 +74,35 @@ class Example extends Component {
             title="newscuria"
             iconClassNameRight="muidocs-icon-navigation-expand-more"
           />
-          {
-            Object.keys(topImages).map((tweetId) => {
-              const tweetUrls = topImages[tweetId];
-              // console.log(tweetId);
-              return Object.keys(tweetUrls).map((urlKey) => {
-                const url = tweetUrls[urlKey];
-                const topImageUrl = url.top_image_url;
-                const faces = url.emotions_object;
-                console.log(topImageUrl);
-                console.log(faces);
-                return (
-                  <TopImage
-                    url={topImageUrl}
-                    faces={faces || []}
-                    tweetId={tweetId}
-                  />
-                );
-              });// Object.keys(tweetUrls)
-            })// Object.keys(topImages)
-          }
+          <div style={styles.root}>
+            <GridList
+              cols={4}
+              cellHeight={200}
+              style={styles.gridList}
+            >
+              {
+                Object.keys(topImages).map((tweetId) => {
+                  const tweetUrls = topImages[tweetId];
+                  // console.log(tweetId);
+                  return Object.keys(tweetUrls).map((urlKey) => {
+                    const url = tweetUrls[urlKey];
+                    const topImageUrl = url.top_image_url;
+                    const faces = url.emotions_object;
+                    console.log(topImageUrl);
+                    console.log(faces);
+                    return (
+                      <GridTile
+                        title={<ArticleTitle tweetId={tweetId} />}
+                        subtitle={<ArticleSource tweetId={tweetId} />}
+                      >
+                        <img src={topImageUrl} role="presentation" />
+                      </GridTile>
+                    );
+                  });// Object.keys(tweetUrls)
+                })// Object.keys(topImages)
+              }
+            </GridList>
+          </div>
         </div>
       </MuiThemeProvider>
     );
