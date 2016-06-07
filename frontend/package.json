@@ -6,14 +6,14 @@
   "scripts": {
     "dev": "reactpack --dev src/index.js",
     "build": "reactpack src/index.js",
+    "predeploy": "npm run-script build",
+    "deploy": "firebase deploy",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
-    "bootstrap": "^3.3.6",
     "firebase": "^3.0.3",
     "react": "^15.1.0",
-    "react-dom": "^15.1.0",
-    "reactfire": "^1.0.0"
+    "react-dom": "^15.1.0"
   },
   "author": "said apale <saidimu@gmail.com>",
   "license": "ISC",

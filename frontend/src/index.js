@@ -2,14 +2,30 @@ import React, { Component } from 'react';
 import { render } from 'react-dom';
 
 import AppBar from 'material-ui/AppBar';
+import {
+  deepPurple500 as primary1Color,
+  deepPurple700 as primary2Color,
+} from 'material-ui/styles/colors';
 import getMuiTheme from 'material-ui/styles/getMuiTheme';
 import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
-// import darkBaseTheme from 'material-ui/styles/baseThemes/darkBaseTheme';
-import darkBaseTheme from 'material-ui/styles/baseThemes/lightBaseTheme';
 
 
 import { getTopImages } from './firebase.js';
 import TopImage from '../components/TopImage.js';
+
+// http://www.material-ui.com/#/customization/themes
+// https://github.com/callemall/material-ui/blob/master/src/styles/colors.js
+// https://github.com/callemall/material-ui/blob/master/src/styles/baseThemes/lightBaseTheme.js
+const muiTheme = getMuiTheme({
+  palette: {
+    primary1Color,
+    primary2Color,
+    pickerHeaderColor: primary1Color,
+  },
+  appBar: {
+    height: 50,
+  },
+});// muiTheme
 
 class Example extends Component {
   constructor(props) {
@@ -37,7 +53,7 @@ class Example extends Component {
     const topImages = this.state.topImages;
 
     return (
-      <MuiThemeProvider muiTheme={getMuiTheme(darkBaseTheme)}>
+      <MuiThemeProvider muiTheme={muiTheme}>
         <div>
           <AppBar
             title="newscuria"
