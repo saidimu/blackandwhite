@@ -1,1 +1,3 @@
-firebase.config.json
+firebase.private.config.json
+firebase.json
+.firebaserc
