@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import { render } from 'react-dom';
+import injectTapEventPlugin from 'react-tap-event-plugin';
 
 import AppBar from 'material-ui/AppBar';
 import {
@@ -9,6 +10,7 @@ import {
 import { GridList, GridTile } from 'material-ui/GridList';
 import getMuiTheme from 'material-ui/styles/getMuiTheme';
 import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
+import IconButton from 'material-ui/IconButton';
 
 import { getTopImages } from './firebase.js';
 import ArticleTitle from '../components/ArticleTitle.js';
@@ -22,9 +24,6 @@ const muiTheme = getMuiTheme({
     primary1Color,
     primary2Color,
     pickerHeaderColor: primary1Color,
-  },
-  appBar: {
-    height: 50,
   },
 });// muiTheme
 
@@ -51,7 +50,7 @@ class Example extends Component {
   }// constructor
 
   componentWillMount() {
-    getTopImages(20, (err, topImages) => {
+    getTopImages(25, (err, topImages) => {
       if (!err) {
         // console.log(topImages);
         this.setState({ topImages });
@@ -71,13 +70,25 @@ class Example extends Component {
       <MuiThemeProvider muiTheme={muiTheme}>
         <div>
           <AppBar
-            title="newscuria"
+            style={{
+              position: 'fixed',
+            }}
+            title="get played"
             zDepth={5}
-            iconClassNameRight="muidocs-icon-navigation-expand-more"
+            iconElementLeft={
+              <IconButton iconClassName="material-icons">
+                play_circle_outline
+              </IconButton>
+            }
+            iconElementRight={
+              <IconButton iconClassName="material-icons">
+                more_vert
+              </IconButton>
+            }
           />
           <div style={styles.root}>
             <GridList
-              cols={4}
+              cols={5}
               cellHeight={200}
               style={styles.gridList}
             >
@@ -109,5 +120,9 @@ class Example extends Component {
     );
   }// render
 }// Example
+
+// Needed for onTouchTap
+// http://stackoverflow.com/a/34015469/988941
+injectTapEventPlugin();
 
 render(<Example />, document.getElementById('react-app'));
