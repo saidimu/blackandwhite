@@ -15,6 +15,10 @@ import {
   save_articles
 } from './analysis.js';
 
+import {
+  stats
+} from './statsd.js';
+
 var path = require('path');
 var appname = path.basename(__filename, '.js');
 var log = require('./logging.js')(appname);
@@ -25,10 +29,11 @@ init_writer();
 get_tweet_stream((tweet) => {
   const topic = process.env.TWEETS_TOPIC;
   log.info({ tweet_id: tweet.id_str, topic }, 'Publishing received tweet.');
+  stats.increment('${topic}.count');
   publish(topic, tweet);
 });// get_tweet_stream
 process_tweets();
 process_urls();
 save_urls();
-process_articles();
+// process_articles();
 save_articles();
