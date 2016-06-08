@@ -93,7 +93,7 @@ export function process_urls() {
     log.debug({topic, channel, tweet_id, url_object}, 'Urls message object');
 
     if(!expanded_url)  {
-      stats.increment('${topic}.${channel}.error.expanded_url');
+      stats.increment(`${topic}.${channel}` + '.error.expanded_url');
       log.error({topic, channel, tweet_id, url_object}, "Missing a valid expanded_url object in message");
       message.finish();
       return;
@@ -147,7 +147,7 @@ export function process_urls() {
               message.finish();
 
             } else {
-              stats.increment('${topic}.${channel}.error.article_empty');
+              stats.increment(`${topic}.${channel}` + '.error.article_empty');
               log.error({ topic, channel, tweet_id, url_object, article }, 'Article is empty.');
               // requeue message in case transient issues are responsible for empty Article
               // DO NOT treat the requeue as an error ## https://github.com/dudleycarr/nsqjs#message
@@ -159,7 +159,7 @@ export function process_urls() {
             duration = end - start;
             stats.histogram('get_article.tweet_urls.process.catch', duration);
 
-            stats.increment('${topic}.${channel}.error.get_request');
+            stats.increment(`${topic}.${channel}` + '.error.get_request');
             log.error({topic, channel, err, tweet_id, expanded_url}, 'Error executing get_article API request');
             message.finish();
 
@@ -190,7 +190,7 @@ export function save_urls() {
     const expanded_url = url_object.expanded_url || null; // FIXME TODO check for empty url object
 
     if(!expanded_url)  {
-      stats.increment('${topic}.${channel}.error.expanded_url');
+      stats.increment(`${topic}.${channel}` + '.error.expanded_url');
       log.error({topic, channel, tweet_id, url_object}, "Missing a valid expanded_url object in message");
       message.finish();
       return;
@@ -245,7 +245,7 @@ export function process_articles() {
     log.debug({topic, channel, tweet_id, article_keys: Object.keys(article)}, 'Article message object');
 
     if(!article)  {
-      stats.increment('${topic}.${channel}.error.empty_article');
+      stats.increment(`${topic}.${channel}` + '.error.empty_article');
       log.error({topic, channel, tweet_id, article}, "Empty Article object in message");
       message.finish();
       return;
@@ -254,7 +254,7 @@ export function process_articles() {
     const top_image_url = article.top_image || null;
 
     if(!top_image_url)  {
-      stats.increment('${topic}.${channel}.error.top_image_url');
+      stats.increment(`${topic}.${channel}` + '.error.top_image_url');
       log.error({topic, channel, tweet_id}, "Empty top_image_url object in message");
       message.finish();
       return;
@@ -295,7 +295,7 @@ export function process_articles() {
                 end = now();
                 duration = end - start;
                 stats.histogram('firebase.articles.push.top_images.save.then', duration);
-                stats.increment('${topic}.${channel}.firebase.top_images.save');
+                stats.increment(`${topic}.${channel}` + '.firebase.top_images.save');
                 log.info({topic, channel, tweet_id, top_image_url, firebase_key: value.key}, 'TopImage object saved.');
                 message.finish();
               }).catch(function(err)  {
@@ -307,7 +307,7 @@ export function process_articles() {
               });// TopImages.child
 
             } else {
-              stats.increment('${topic}.${channel}.empty.analyze_emotion');
+              stats.increment(`${topic}.${channel}` + '.empty.analyze_emotion');
               log.info({topic, channel, tweet_id, top_image_url, expanded_url}, 'Error. Empty analyze_emotion API response');
               message.finish();
             }// if-else
@@ -317,7 +317,7 @@ export function process_articles() {
             duration = end - start;
             stats.histogram('analyze_emotion.top_image_url.process.catch', duration);
 
-            stats.increment('${topic}.${channel}.error.analyze_emotion');
+            stats.increment(`${topic}.${channel}` + '.error.analyze_emotion');
             log.error({topic, channel, err, tweet_id, top_image_url, expanded_url}, 'Error executing analyze_emotion API request');
             message.finish();
           });// analyze_emotion
@@ -421,7 +421,7 @@ export function save_articles() {
         end = now();
         duration = end - start;
         stats.histogram('firebase.articles.push.articles.save.then', duration);
-        stats.increment('${topic}.${channel}.firebase.article.save');
+        stats.increment(`${topic}.${channel}` + '.firebase.article.save');
         log.info({topic, channel, tweet_id, expanded_url, firebase_key: value.key}, 'Article object saved.');
         message.finish();
       }).catch(function(err)  {
@@ -440,7 +440,7 @@ export function save_articles() {
 
 function on_discard_message(message)  {
   const topic = process.env.DISCARDED_MESSAGES_TOPIC;
-  stats.increment('${topic}.message_discard');
+  stats.increment(`${topic}` + '.message_discard');
   log.warn({topic, num_attempts: message.attempts}, 'Publishing Message DISCARD event.');
   publish_message(topic, message.json());
 }// on_discard_message

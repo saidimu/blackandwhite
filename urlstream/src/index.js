@@ -29,7 +29,7 @@ init_writer();
 get_tweet_stream((tweet) => {
   const topic = process.env.TWEETS_TOPIC;
   log.info({ tweet_id: tweet.id_str, topic }, 'Publishing received tweet.');
-  stats.increment(`${topic}.count`);
+  stats.increment(`${topic}` + '.count');
   publish(topic, tweet);
 });// get_tweet_stream
 process_tweets();
