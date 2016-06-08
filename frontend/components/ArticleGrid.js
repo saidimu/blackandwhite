@@ -12,7 +12,7 @@ const styles = {
 
 const ArticleGrid = ({ articles }) => (
   <GridList
-    cols={5}
+    cols={4}
     cellHeight={200}
     style={styles.gridList}
   >

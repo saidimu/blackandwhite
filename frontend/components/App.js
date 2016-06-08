@@ -8,6 +8,7 @@ import {
 import getMuiTheme from 'material-ui/styles/getMuiTheme';
 import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
 import IconButton from 'material-ui/IconButton';
+import CircularProgress from 'material-ui/CircularProgress';
 
 // http://www.material-ui.com/#/customization/themes
 // https://github.com/callemall/material-ui/blob/master/src/styles/colors.js
@@ -21,10 +22,16 @@ const muiTheme = getMuiTheme({
 });// muiTheme
 
 const styles = {
-  root: {
+  articles: {
     display: 'flex',
     flexWrap: 'wrap',
     justifyContent: 'space-around',
+  },
+  loading: {
+    height: 200,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 };// styles
 
@@ -40,7 +47,7 @@ class App extends Component {
   }// constructor
 
   componentWillMount() {
-    getArticles(25, (err, articles) => {
+    getArticles(20, (err, articles) => {
       console.log(err);
       console.log(articles);
       if (!err) {
@@ -51,8 +58,35 @@ class App extends Component {
     });// getArticles
   }// componentWillMount
 
+  _renderLoadingIndicator() {
+    // console.log(styles.loading);
+    return (
+      <div style={styles.loading}>
+        <CircularProgress size={1} />
+      </div>
+    );// return
+  }// _renderLoadingIndicator
+
+  _renderArticles(articles) {
+    // console.log(styles.articles);
+    return (
+      <div style={styles.articles}>
+        <ArticleGrid articles={articles} />
+      </div>
+    );// return
+  }// _renderArticles
+
   render() {
     const articles = this.state.articles;
+    let Articles;
+
+    // Articles = this._renderLoadingIndicator();
+    if (Object.keys(articles).length === 0) {
+      Articles = this._renderLoadingIndicator();
+    } else {
+      Articles = this._renderArticles(articles);
+      // Articles = <ArticleGrid articles={articles} />;
+    }// if-else
 
     return (
       <MuiThemeProvider muiTheme={muiTheme}>
@@ -74,9 +108,7 @@ class App extends Component {
               </IconButton>
             }
           />
-          <div style={styles.root}>
-            <ArticleGrid articles={articles} />
-          </div>
+          {Articles}
         </div>
       </MuiThemeProvider>
     );// return
