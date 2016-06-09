@@ -1,8 +1,4 @@
 import { PropTypes } from 'react';
-// import IconButton from 'material-ui/IconButton';
-//
-// const styles = {
-// };// styles
 
 const Article = ({ article }) => {
   console.log(article);

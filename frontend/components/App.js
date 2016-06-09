@@ -39,6 +39,9 @@ import { getArticles } from '../src/firebase.js';
 import Article from './Article.js';
 import ArticlesGrid from '../components/ArticlesGrid.js';
 
+const NUM_ARTICLES = 5;
+const NUM_GRID_COLUMNS = 5;
+
 class App extends Component {
   constructor(props) {
     super(props);
@@ -50,7 +53,7 @@ class App extends Component {
   }// constructor
 
   componentWillMount() {
-    getArticles(4, (err, articles) => {
+    getArticles(NUM_ARTICLES, (err, articles) => {
       // console.log(articles);
       if (!err) {
         this.setState({ articles });
@@ -75,6 +78,7 @@ class App extends Component {
       <div style={styles.articles}>
         <ArticlesGrid
           articles={articles}
+          gridColumns={NUM_GRID_COLUMNS}
           onClickHandler={this._handleArticleGridTileClick}
         />
       </div>

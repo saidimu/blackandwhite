@@ -11,9 +11,9 @@ const styles = {
   },
 };// styles
 
-const ArticlesGrid = ({ articles, onClickHandler }) => (
+const ArticlesGrid = ({ articles, gridColumns, onClickHandler }) => (
   <GridList
-    cols={4}
+    cols={gridColumns}
     cellHeight={200}
     style={styles.gridList}
   >
@@ -51,15 +51,8 @@ const ArticlesGrid = ({ articles, onClickHandler }) => (
 
 ArticlesGrid.propTypes = {
   articles: PropTypes.object.isRequired,
+  gridColumns: PropTypes.number.isRequired,
   onClickHandler: PropTypes.func.isRequired,
 };// ArticlesGrid.propTypes
-
-// ArticlesGrid.handleTouchTap = (tweetId, articleKey) => {
-//   console.log(tweetId, articleKey);
-// };// ArticlesGrid.handleTouchTap
-
-// function handleClick(tweetId, articleKey) {
-//   console.log(tweetId, articleKey);
-// }// handleClick
 
 export default ArticlesGrid;
