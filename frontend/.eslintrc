@@ -6,6 +6,7 @@
     "no-iterator": 0,
     "no-restricted-syntax": [1, "ForInStatement"],
     "react/jsx-boolean-value": 0,
+    "react/jsx-no-bind": 0,
     "no-underscore-dangle": ["error", { "allowAfterThis": true }]
   }
 }

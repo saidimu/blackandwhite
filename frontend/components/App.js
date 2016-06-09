@@ -36,7 +36,8 @@ const styles = {
 };// styles
 
 import { getArticles } from '../src/firebase.js';
-import ArticleGrid from '../components/ArticleGrid.js';
+import Article from './Article.js';
+import ArticlesGrid from '../components/ArticlesGrid.js';
 
 class App extends Component {
   constructor(props) {
@@ -44,12 +45,13 @@ class App extends Component {
     this.state = {
       articles: {},
     };// state
+
+    this._handleArticleGridTileClick = this._handleArticleGridTileClick.bind(this);
   }// constructor
 
   componentWillMount() {
-    getArticles(20, (err, articles) => {
-      console.log(err);
-      console.log(articles);
+    getArticles(4, (err, articles) => {
+      // console.log(articles);
       if (!err) {
         this.setState({ articles });
       } else {
@@ -71,13 +73,23 @@ class App extends Component {
     // console.log(styles.articles);
     return (
       <div style={styles.articles}>
-        <ArticleGrid articles={articles} />
+        <ArticlesGrid
+          articles={articles}
+          onClickHandler={this._handleArticleGridTileClick}
+        />
       </div>
     );// return
   }// _renderArticles
 
+  _handleArticleGridTileClick(tweetId, articleKey) {
+    const { articles } = this.state;
+    const article = articles[tweetId][articleKey];
+
+    console.log(tweetId, articleKey);
+  }// _handleArticleGridTileClick
+
   render() {
-    const articles = this.state.articles;
+    const { articles } = this.state;
     let Articles;
 
     // Articles = this._renderLoadingIndicator();
@@ -85,7 +97,7 @@ class App extends Component {
       Articles = this._renderLoadingIndicator();
     } else {
       Articles = this._renderArticles(articles);
-      // Articles = <ArticleGrid articles={articles} />;
+      // Articles = <ArticlesGrid articles={articles} />;
     }// if-else
 
     return (
