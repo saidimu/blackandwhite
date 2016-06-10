@@ -34,7 +34,8 @@ const SHORT_DOMAIN_TO_LONG_DOMAIN_MAPPING = {
   'fxn.ws': 'foxnews.com',
   'nyti.ms':'nytimes.com',
   'wapo.st': 'washingtonpost.com',
-  'gu.com': 'theguardian.com'
+  'gu.com': 'theguardian.com',
+  'politi.co': 'politico.com',
 }// SHORT_DOMAIN_TO_LONG_DOMAIN_MAPPING
 
 function short_domain_to_long_domain(short_domain)  {
@@ -55,7 +56,7 @@ export function get_site_alignment(site_url) {
   // var hostname = urlparse(site_url).hostname || null;
   const { subdomain, domain, tld } = parseDomain(site_url);
   let hostname = `${domain}.${tld}`;
-  console.log(hostname);
+  // console.log(hostname);
 
   if(!hostname) {
     return [];
@@ -63,7 +64,7 @@ export function get_site_alignment(site_url) {
 
   // convert potentially short domain into long form (e.g. gu.com into theguardian.com)
   hostname = short_domain_to_long_domain(hostname);
-  console.log(hostname);
+  // console.log(hostname);
 
   var raw_alignment = filter(top500_sites, function(site)  {
     return site.domain.includes(hostname);
