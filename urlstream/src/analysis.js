@@ -467,15 +467,15 @@ function get_article(expanded_url)  {
     return null;
   }//if
 
-  const site_allowed = filter_site(expanded_url);
-  if(!site_allowed) {
-    stats.increment('get_article.warn.not_top500');
-    log.warn({
-      expanded_url,
-      site_allowed,
-    }, 'Ignore url b/c it is not in list of news domains to fetch articlesfrom.');
-    return null;
-  }// site_alignment
+  // const site_allowed = filter_site(expanded_url);
+  // if(!site_allowed) {
+  //   stats.increment('get_article.warn.not_top500');
+  //   log.warn({
+  //     expanded_url,
+  //     site_allowed,
+  //   }, 'Ignore url b/c it is not in list of news domains to fetch articlesfrom.');
+  //   return null;
+  // }// site_alignment
 
   if(expanded_url) {
     stats.increment('get_article.info.fetch_article');
