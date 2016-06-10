@@ -431,18 +431,18 @@ export function save_articles() {
         duration = end - start;
         stats.histogram('firebase.articles.push.articles.save.then', duration);
         stats.increment(`${topic}.${channel}` + '.firebase.article.save');
-        log.info({topic, channel, tweet_id, expanded_url, firebase_key: value.key}, 'Article object saved.');
+        log.info({topic, channel, tweet_id, expanded_url, firebase_key: value.key}, 'Article object saved to Firebase.');
         message.finish();
       }).catch(function(err)  {
         end = now();
         duration = end - start;
         stats.histogram('firebase.articles.push.articles.save.catch', duration);
-        log.error({topic, channel, err, tweet_id, article_object});
+        log.error({topic, channel, err, tweet_id, article_object}, 'Error saving Article object to Firebase.');
         message.finish();
       });// Articles.child
     } catch (e) {
       message.finish();
-      log.error({e});
+      log.error({e}, 'Error saving Article object to Firebase.');
     }// try-catch
   }// on_article
 }// save_articles
