@@ -29,7 +29,7 @@ var SITE_ALIGNMENT_MAPPING = {
   '-1': 'liberal',
 }// alignment
 
-function get_site_alignment(site_url) {
+export function get_site_alignment(site_url) {
   if(!site_url) {
     return [];
   }// if
@@ -54,15 +54,10 @@ function get_site_alignment(site_url) {
   return raw_alignment;
 }// get_site_alignment
 
-function filter_site(site_url) {
+export function filter_site(site_url) {
   if(get_site_alignment(site_url).length) {
     return true;
   } else {
     return false;
   }// if
 }// filter_site
-
-module.exports = {
-  get_site_alignment: get_site_alignment,
-  filter_site: filter_site
-}
