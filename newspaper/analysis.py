@@ -27,7 +27,7 @@ def article_handler(url=None, nlp=False):
         article = Article(url)
         if not article.is_downloaded:
             statsd.increment('url_analysis.download')
-            loggly.info("Downloading article: '%s'", url)
+            loggly.info("Downloading article")
             article.download()
         ##if
 
@@ -35,7 +35,7 @@ def article_handler(url=None, nlp=False):
 
         if not article.is_parsed:
             statsd.increment('url_analysis.parse')
-            loggly.info("Parsing article: '%s'", url)
+            loggly.info("Parsing article")
             article.parse()
         ##if
 
@@ -43,13 +43,13 @@ def article_handler(url=None, nlp=False):
 
         if article.has_top_image() is True:
             statsd.increment('url_analysis.get_top_image')
-            loggly.info("Getting top_image: : '%s'", url)
+            loggly.info("Extracting top_image")
             response['top_image'] = article.top_image
         ##if-else
 
         if nlp is True:
             statsd.increment('url_analysis.nlp_process')
-            loggly.info("Doing NLP processing: '%s'", url)
+            loggly.info("Doing NLP processing")
             article.nlp()
             response['summary'] = article.summary
             response['keywords'] = article.keywords

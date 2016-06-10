@@ -33,4 +33,4 @@ RUN pip3 install --no-cache-dir -r requirements.txt && \
 COPY . /usr/src/app
 EXPOSE 8000
 # CMD hug -f api.py
-CMD gunicorn -b 0.0.0.0:8000 --max-requests="$WEB_MAX_REQUESTS" --max-requests-jitter="$WEB_MAX_REQUESTS_JITTER" --preload --access-logfile=- --error-logfile=- --statsd-host="$STATSD_PORT_8125_UDP_ADDR:$STATSD_PORT_8125_UDP_PORT" --statsd-prefix="gunicorn.$HOSTNAME" api:__hug_wsgi__
+CMD gunicorn -b 0.0.0.0:8000 --worker-class="gevent" --timeout="$WEB_TIMEOUT" --max-requests="$WEB_MAX_REQUESTS" --max-requests-jitter="$WEB_MAX_REQUESTS_JITTER" --preload --access-logfile=- --error-logfile=- --statsd-host="$STATSD_PORT_8125_UDP_ADDR:$STATSD_PORT_8125_UDP_PORT" --statsd-prefix="gunicorn.$HOSTNAME" api:__hug_wsgi__

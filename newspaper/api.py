@@ -11,5 +11,5 @@ from statsd import statsd
 @hug.get('/article', output=hug.output_format.json)
 def article(url:hug.types.longer_than(7)):
     """Returns a URL's article data"""
-    loggly.info("Analyzing '%s'", url)
+    loggly.info("Analyzing url")
     return article_handler(url, True)
