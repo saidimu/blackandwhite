@@ -7,6 +7,17 @@ initializeApp(config);
 const TopImages = database().ref('top_images');
 const Articles = database().ref('articles');
 
+export function getArticles(maxItems, callback) {
+  const limit = maxItems || 10;
+  Articles.limitToLast(limit).on('value', (dataSnapshot) => {
+    const articles = dataSnapshot.val();
+    callback(null, articles);
+  // }).catch((error) => {
+  //   console.error(error);
+  //   callback(error, null);
+  });// Articles....()
+}// getArticles
+
 export function getTopImages(maxItems, callback) {
   const limit = maxItems || 10;
   TopImages.limitToLast(limit).on('value', (dataSnapshot) => {
