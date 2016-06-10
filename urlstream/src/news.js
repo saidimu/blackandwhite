@@ -13,7 +13,8 @@
  */
 
 var filter = require('lodash.filter');
-var urlparse = require('url').parse;
+// var urlparse = require('url').parse;
+var parseDomain = require('parse-domain');
 
 var top500_sites = require('./news_top500.json');
 
@@ -21,7 +22,7 @@ var top500_sites = require('./news_top500.json');
  * ... mapping the 500 most common ideological affiliations listed in individuals' profile
  * .. to a five-point {-2, -1, 0, 1, 2} numerical representation
  */
-var SITE_ALIGNMENT_MAPPING = {
+const SITE_ALIGNMENT_MAPPING = {
   '0': 'independent',
   '1': 'conservative',
   '2': 'very conservative',
@@ -29,16 +30,40 @@ var SITE_ALIGNMENT_MAPPING = {
   '-1': 'liberal',
 }// alignment
 
+const SHORT_DOMAIN_TO_LONG_DOMAIN_MAPPING = {
+  'fxn.ws': 'foxnews.com',
+  'nyti.ms':'nytimes.com',
+  'wapo.st': 'washingtonpost.com',
+  'gu.com': 'theguardian.com'
+}// SHORT_DOMAIN_TO_LONG_DOMAIN_MAPPING
+
+function short_domain_to_long_domain(short_domain)  {
+  const long_domain = SHORT_DOMAIN_TO_LONG_DOMAIN_MAPPING[short_domain];
+  return long_domain || short_domain;
+  // if (!long_domain)  {
+  //   return short_domain;
+  // } else {
+  //   return long_domain;
+  // }// if-else
+}// short_domain_to_long_domain
+
 export function get_site_alignment(site_url) {
   if(!site_url) {
     return [];
   }// if
 
-  var hostname = urlparse(site_url).hostname || null;
+  // var hostname = urlparse(site_url).hostname || null;
+  const { subdomain, domain, tld } = parseDomain(site_url);
+  let hostname = `${domain}.${tld}`;
+  console.log(hostname);
 
   if(!hostname) {
     return [];
   }// if
+
+  // convert potentially short domain into long form (e.g. gu.com into theguardian.com)
+  hostname = short_domain_to_long_domain(hostname);
+  console.log(hostname);
 
   var raw_alignment = filter(top500_sites, function(site)  {
     return site.domain.includes(hostname);

@@ -1,5 +1,6 @@
 var fetch = require('node-fetch');
-var urlparse = require('url').parse;
+// var urlparse = require('url').parse;
+var parseDomain = require('parse-domain');
 
 var path = require('path');
 var appname = path.basename(__filename, '.js');
@@ -454,7 +455,9 @@ function on_discard_message(message)  {
 }// on_discard_message
 
 function get_article(expanded_url)  {
-  var link_hostname = urlparse(expanded_url).hostname || null;
+  // var link_hostname = urlparse(expanded_url).hostname || null;
+  const { subdomain, domain, tld } = parseDomain(expanded_url);
+  const link_hostname = `${domain}.${tld}`;
   log.info({link_hostname});
 
   if(IGNORE_HOSTNAMES.includes(link_hostname)) {
@@ -473,8 +476,8 @@ function get_article(expanded_url)  {
     log.warn({
       expanded_url,
       site_allowed,
-    }, 'TEST MODE: Ignore url b/c it is not in list of news domains to fetch articlesfrom.');
-    // return null;
+    }, 'Ignore url b/c it is not in list of news domains to fetch articlesfrom.');
+    return null;
   }// site_alignment
 
   if(expanded_url) {
