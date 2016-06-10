@@ -31,6 +31,11 @@ import {
   get_emotion_api_token
 } from './ratelimit.js';
 
+import {
+  filter_site,
+  get_site_alignment
+} from './news.js';
+
 init_writer();
 
 const IGNORE_HOSTNAMES = process.env.IGNORE_HOSTNAMES.split(',') || [];
@@ -129,6 +134,7 @@ export function process_urls() {
 
             if(article) {
               const article_message = { tweet_id, expanded_url, article };
+              const site_alignment = get_site_alignment(expanded_url);
 
               log.info({
                 topic,
@@ -136,11 +142,12 @@ export function process_urls() {
                 tweet_id,
                 expanded_url,
                 article_title: article.title,
-                source_url: article.source_url
+                source_url: article.source_url,
+                site_alignment
               }, 'Article metadata');
 
               log.debug({ topic, channel, article_message }, 'Article message');
-              log.info({article_topic, tweet_id, expanded_url}, 'Publishing Article related to url.');
+              log.info({article_topic, tweet_id, expanded_url, site_alignment}, 'Publishing Article related to url.');
 
               publish_message(article_topic, article_message);
 
@@ -149,9 +156,14 @@ export function process_urls() {
             } else {
               stats.increment(`${topic}.${channel}` + '.error.article_empty');
               log.error({ topic, channel, tweet_id, url_object, article }, 'Article is empty.');
-              // requeue message in case transient issues are responsible for empty Article
-              // DO NOT treat the requeue as an error ## https://github.com/dudleycarr/nsqjs#message
-              message.requeue(null, false);
+
+              // // requeue message in case transient issues are responsible for empty Article
+              // // DO NOT treat the requeue as an error ## https://github.com/dudleycarr/nsqjs#message
+              // message.requeue(null, false);
+
+              // previous policy resulted in too many requeues and subsequent message discards
+              // now finish()ing the message regardless of the cause of the empty article response
+              message.finish();
 
             }// if-else
           }).catch(function(err)  {
@@ -385,6 +397,7 @@ export function save_articles() {
     const tweet_id = message_object.tweet_id;
     const expanded_url = message_object.expanded_url;
     const article = message_object.article;
+    const site_alignment = message_object.site_alignment;
 
     log.debug({topic, channel, tweet_id, expanded_url}, 'Article related to url.');
 
@@ -405,12 +418,7 @@ export function save_articles() {
     const article_object = {
       expanded_url,
       article,
-      images,
-      publish_date,
-      title,
-      authors,
-      keywords,
-      summary
+      site_alignment
     };// article_object
 
     var start = now();
@@ -452,11 +460,22 @@ function get_article(expanded_url)  {
   if(IGNORE_HOSTNAMES.includes(link_hostname)) {
     stats.increment('get_article.warn.ignore_hostname');
     log.warn({
+      expanded_url,
       link_hostname,
       ignore_hostnames: IGNORE_HOSTNAMES
     }, 'Ignore link hostname b/c it is in list of IGNORED HOSTNAMES');
     return null;
   }//if
+
+  const site_allowed = filter_site(expanded_url);
+  if(!site_allowed) {
+    stats.increment('get_article.warn.not_top500');
+    log.warn({
+      expanded_url,
+      site_allowed,
+    }, 'Ignore url b/c it is not in list of news domains to fetch articlesfrom.');
+    return null;
+  }// site_alignment
 
   if(expanded_url) {
     stats.increment('get_article.info.fetch_article');
