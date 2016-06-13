@@ -7,7 +7,7 @@ import {
 } from './analysis.js';
 
 // process_tweets();
-process_urls();
+// process_urls();
 save_urls();
 // process_articles();
 save_articles();
