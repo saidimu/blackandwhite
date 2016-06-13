@@ -8,6 +8,7 @@
     "start": "npm run build && node dist/index.js",
     "stream_tweets": "npm run build && node dist/stream_tweets.js",
     "process_tweets": "npm run build && node dist/process_tweets.js",
+    "process_urls": "npm run build && node dist/process_urls.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "said apale <saidimu@gmail.com>",
