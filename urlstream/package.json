@@ -4,8 +4,9 @@
   "description": "stream urls from twitter",
   "main": "index.js",
   "scripts": {
-    "prestart": "babel src --out-dir dist && cp src/news_top500.json dist",
-    "start": "node dist/index.js",
+    "build": "babel src --out-dir dist && cp src/news_top500.json dist",
+    "start": "npm run build && node dist/index.js",
+    "tweets": "npm run build && node dist/get_tweets.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "said apale <saidimu@gmail.com>",
