@@ -15,14 +15,13 @@ import {
 init_writer();
 
 export function process_tweets() {
-  init_reader(
-    process.env.TWEETS_TOPIC,
-    process.env.TWEETS_PROCESS_CHANNEL,
-    {
-      message: on_tweet,
-      discard: on_discard_message,
-    }
-  );// init_reader
+  const topic = process.env.TWEETS_TOPIC;
+  const channel = process.env.TWEETS_PROCESS_CHANNEL;
+
+  init_reader(topic, channel, {
+    message: on_tweet,
+    discard: on_discard_message,
+  });// init_reader
 
   function on_tweet(message) {
     const tweet = message.json();
@@ -46,10 +45,9 @@ export function process_tweets() {
   }// on_tweet
 
   function on_discard_message(message) {
-    // const topic = process.env.DISCARDED_MESSAGES_TOPIC + '.message_discard';
-    const topic = `${process.env.TWEETS_TOPIC}.${process.env.TWEETS_PROCESS_CHANNEL}.discarded`;
-    stats.increment(topic);
-    log.warn({ topic, num_attempts: message.attempts }, 'Discarded message.');
-    publish_message(topic, message.json());
+    const discard_topic = `${topic}.${channel}.discarded`;
+    stats.increment(discard_topic);
+    log.warn({ discard_topic, num_attempts: message.attempts }, 'Discarded message.');
+    publish_message(discard_topic, message.json());
   }// on_discard_message
 }// process_tweets
