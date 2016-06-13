@@ -71,13 +71,13 @@ export function save_urls() {
           Urls
             .child(tweet_id)
             .push(url_object)
-            .then(() => { // not using return (Firebase-saved) value
+            .then((firebase_object) => {
               end = now();
               duration = end - start;
               stats.histogram('firebase.urls.push.tweet_urls.save.then', duration);
 
               log.info({
-                topic, channel, tweet_id, url_object, firebase_key: value.key,
+                topic, channel, tweet_id, url_object, firebase_key: firebase_object.key,
               }, 'Tweet URL object saved.');
               message.finish();
             })
