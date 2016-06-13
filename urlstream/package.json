@@ -10,6 +10,7 @@
     "process_tweets": "npm run build && node dist/process_tweets.js",
     "process_urls": "npm run build && node dist/process_urls.js",
     "save_urls": "npm run build && node dist/save_urls.js",
+    "process_articles": "npm run build && node dist/process_articles.js",
     "save_articles": "npm run build && node dist/save_articles.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
