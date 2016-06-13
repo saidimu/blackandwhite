@@ -1,5 +1,4 @@
-const path = require('path');
-const appname = path.basename(__filename, '.js');
+const appname = require('path').basename(__filename, '.js');
 const log = require('./logging.js')(appname);
 
 import {
@@ -11,8 +10,6 @@ import {
   init_reader,
   publish as publish_message,
 } from './messaging.js';
-
-init_writer();
 
 export function process_tweets() {
   const topic = process.env.TWEETS_TOPIC;
@@ -51,3 +48,6 @@ export function process_tweets() {
     publish_message(discard_topic, message.json());
   }// on_discard_message
 }// process_tweets
+
+init_writer();
+process_tweets();
