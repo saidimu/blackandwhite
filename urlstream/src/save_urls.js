@@ -102,3 +102,6 @@ export function save_urls() {
     publish_message(discard_topic, message.json());
   }// on_discard_message
 }// save_urls
+
+init_writer();
+save_urls();
