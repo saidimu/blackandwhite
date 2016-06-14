@@ -5,7 +5,6 @@
   "main": "index.js",
   "scripts": {
     "build": "babel src --out-dir dist && cp src/news_top500.json dist",
-    "start": "npm run build && node dist/index.js",
     "stream_tweets": "npm run build && node dist/stream_tweets.js",
     "process_tweets": "npm run build && node dist/process_tweets.js",
     "process_urls": "npm run build && node dist/process_urls.js",
