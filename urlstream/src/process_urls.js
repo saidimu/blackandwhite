@@ -1,6 +1,8 @@
 const appname = require('path').basename(__filename, '.js');
 const log = require('./logging.js')(appname);
 
+const fetch = require('node-fetch');
+
 import {
   stats,
 } from './statsd.js';
@@ -197,7 +199,7 @@ function skip_url_processing(expanded_url) {
     log.warn({
       expanded_url,
       site_allowed,
-    }, 'Ignore url b/c it is not in list of news domains to fetch articlesfrom.');
+    }, 'Ignore url b/c it is not in list of news domains to fetch articles from.');
     return true;
   }// site_alignment
 
