@@ -56,6 +56,10 @@ export function process_urls() {
       return;
     }// if
 
+    if (skip_url_processing(expanded_url)) {
+      return;
+    }// if
+
     let start = now();
     let end;
     let duration;
@@ -155,30 +159,9 @@ export function process_urls() {
 }// process_urls
 
 function get_article(expanded_url) {
-  // var link_hostname = urlparse(expanded_url).hostname || null;
-  const { domain, tld } = parseDomain(expanded_url);
-  const link_hostname = `${domain}.${tld}`;
-  log.info({ link_hostname });
-
-  if (IGNORE_HOSTNAMES.includes(link_hostname)) {
-    stats.increment('get_article.warn.ignore_hostname');
-    log.warn({
-      expanded_url,
-      link_hostname,
-      ignore_hostnames: IGNORE_HOSTNAMES,
-    }, 'Ignore link hostname b/c it is in list of IGNORED HOSTNAMES');
+  if (skip_url_processing(expanded_url)) {
     return null;
   }// if
-
-  const site_allowed = filter_site(expanded_url);
-  if (!site_allowed) {
-    stats.increment('get_article.warn.not_top500');
-    log.warn({
-      expanded_url,
-      site_allowed,
-    }, 'Ignore url b/c it is not in list of news domains to fetch articlesfrom.');
-    return null;
-  }// site_alignment
 
   if (expanded_url) {
     stats.increment('get_article.info.fetch_article');
@@ -192,6 +175,34 @@ function get_article(expanded_url) {
     return null;
   }// if-else
 }// get_article
+
+function skip_url_processing(expanded_url) {
+  const { domain, tld } = parseDomain(expanded_url);
+  const link_hostname = `${domain}.${tld}`;
+  log.info({ link_hostname });
+
+  if (IGNORE_HOSTNAMES.includes(link_hostname)) {
+    stats.increment('get_article.warn.ignore_hostname');
+    log.warn({
+      expanded_url,
+      link_hostname,
+      ignore_hostnames: IGNORE_HOSTNAMES,
+    }, 'Ignore link hostname b/c it is in list of IGNORED HOSTNAMES');
+    return true;
+  }// if
+
+  const site_allowed = filter_site(expanded_url);
+  if (!site_allowed) {
+    stats.increment('get_article.warn.not_top500');
+    log.warn({
+      expanded_url,
+      site_allowed,
+    }, 'Ignore url b/c it is not in list of news domains to fetch articlesfrom.');
+    return true;
+  }// site_alignment
+
+  return false;
+}// skip_url_processing
 
 init_writer();
 process_urls();
