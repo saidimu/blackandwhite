@@ -37,6 +37,11 @@ export function save_articles() {
       topic, channel, tweet_id, expanded_url,
     }, 'Article related to url.');
 
+    // make sure NOT to save article html (space-saving measure)
+    // article fulltext, derived from html, is however saved
+    // html can always be re-downloaded if needed
+    article.html = null;
+
     const article_object = {
       expanded_url,
       article,

@@ -31,7 +31,7 @@ def article_handler(url=None, nlp=False):
             article.download()
         ##if
 
-        response['html'] = article.html
+        # response['html'] = article.html
 
         if not article.is_parsed:
             statsd.increment('url_analysis.parse')
