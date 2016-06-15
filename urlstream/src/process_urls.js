@@ -101,8 +101,8 @@ export function process_urls() {
               stats.histogram('get_article.tweet_urls.process.then', duration);
 
               if (article) {
-                const article_message = { tweet_id, expanded_url, article };
                 const site_alignment = get_site_alignment(expanded_url);
+                const article_message = { tweet_id, expanded_url, article, site_alignment };
 
                 log.info({
                   topic,
