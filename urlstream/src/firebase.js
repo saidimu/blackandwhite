@@ -12,5 +12,6 @@ firebase.initializeApp({
 export const db = firebase.database();
 export const Tweets = db.ref('tweets');
 export const Urls = db.ref('urls');
-export const Articles = db.ref('articles');
+export const Articles = db.ref('articles_lite');
+export const Articles_Old = db.ref('articles');
 export const TopImages = db.ref('top_images');
