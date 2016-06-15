@@ -30,8 +30,8 @@ export function save_articles() {
     const message_object = message.json();
     const tweet_id = message_object.tweet_id;
     const expanded_url = message_object.expanded_url;
-    const article = message_object.article;
-    const site_alignment = message_object.site_alignment;
+    const article = message_object.article || {};
+    const site_alignment = message_object.site_alignment || {};
 
     // make sure NOT to save article html (space-saving measure)
     // article fulltext, derived from html, is however saved
