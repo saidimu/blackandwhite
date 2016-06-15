@@ -33,10 +33,6 @@ export function save_articles() {
     const article = message_object.article;
     const site_alignment = message_object.site_alignment;
 
-    log.debug({
-      topic, channel, tweet_id, expanded_url,
-    }, 'Article related to url.');
-
     // make sure NOT to save article html (space-saving measure)
     // article fulltext, derived from html, is however saved
     // html can always be re-downloaded if needed
@@ -47,6 +43,10 @@ export function save_articles() {
       article,
       site_alignment,
     };// article_object
+
+    log.debug({
+      topic, channel, tweet_id, expanded_url, article_object,
+    }, 'Article data and metada');
 
     const start = now();
     let end;
@@ -72,12 +72,12 @@ export function save_articles() {
           stats.histogram('firebase.articles.push.articles.save.catch', duration);
           log.error({
             topic, channel, err, tweet_id, article_object,
-          }, 'Error saving Article object to Firebase.');
+          }, 'Promise-catch: Error saving Article object to Firebase.');
           message.finish();
         });// Articles.child
     } catch (e) {
       message.finish();
-      log.error({ e }, 'Error saving Article object to Firebase.');
+      log.error({ e }, 'Try-catch: Error saving Article object to Firebase.');
     }// try-catch
   }// on_article
 
