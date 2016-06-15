@@ -36,7 +36,7 @@ const styles = {
 };// styles
 
 import { getArticles } from '../src/firebase.js';
-import Article from './Article.js';
+// import Article from './Article.js';
 import ArticlesGrid from '../components/ArticlesGrid.js';
 
 const NUM_ARTICLES = 25;
@@ -85,11 +85,11 @@ class App extends Component {
     );// return
   }// _renderArticles
 
-  _handleArticleGridTileClick(tweetId, articleKey, site_alignment) {
-    const { articles } = this.state;
+  _handleArticleGridTileClick(tweetId, articleKey, siteAlignment) {
+    // const { articles } = this.state;
     // const article = articles[tweetId][articleKey];
 
-    console.log(tweetId, articleKey, site_alignment);
+    console.log(tweetId, articleKey, siteAlignment);
   }// _handleArticleGridTileClick
 
   render() {
