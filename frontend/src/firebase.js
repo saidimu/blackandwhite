@@ -5,12 +5,16 @@ const config = require('./firebase.private.config.json');
 initializeApp(config);
 
 const TopImages = database().ref('top_images');
-const Articles = database().ref('articles');
+// const Articles = database().ref('articles');
+const Articles = database().ref('articles_lite');
 
 export function getArticles(maxItems, callback) {
   const limit = maxItems || 10;
-  Articles.limitToLast(limit).on('value', (dataSnapshot) => {
+  // Articles.orderByValue().limitToLast(limit).on('value', (dataSnapshot) => {
+  // Articles.orderByChild('expanded_url').limitToLast(limit).on('value', (dataSnapshot) => {
+  Articles.orderByKey().limitToLast(limit).on('value', (dataSnapshot) => {
     const articles = dataSnapshot.val();
+    console.log(articles);
     callback(null, articles);
   // }).catch((error) => {
   //   console.error(error);

@@ -28,7 +28,7 @@ const ArticlesGrid = ({ articles, gridColumns, onClickHandler }) => (
         return (
           <GridTile
             key={articleKey}
-            title={article.title}
+            title={article.article.title}
             subtitle={article.article.source_url}
             actionIcon={
               <IconButton
@@ -39,7 +39,7 @@ const ArticlesGrid = ({ articles, gridColumns, onClickHandler }) => (
                 assignment_ind
               </IconButton>
             }
-            onTouchTap={() => onClickHandler(tweetId, articleKey)}
+            onTouchTap={() => onClickHandler(tweetId, articleKey, article.site_alignment)}
           >
             <img src={article.article.top_image} role="presentation" />
           </GridTile>
@@ -48,6 +48,8 @@ const ArticlesGrid = ({ articles, gridColumns, onClickHandler }) => (
     }
   </GridList>
 );// ArticlesGrid
+
+            // onTouchTap={() => onClickHandler(tweetId, articleKey)}
 
 ArticlesGrid.propTypes = {
   articles: PropTypes.object.isRequired,
