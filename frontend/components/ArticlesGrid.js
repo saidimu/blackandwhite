@@ -8,11 +8,14 @@ const styles = {
   gridList: {
     width: 900,
     // height: 500,
-    overflowY: 'auto',
+    // overflowY: 'auto',
     marginBottom: 24,
   },
   gridTile: {
-    margin: 10,
+    margin: 50,
+  },
+  gridTileHeader: {
+    margin: 0,
   },
 };// styles
 
@@ -23,6 +26,12 @@ const ArticlesGrid = ({ articles, blackwhite, onClickHandler }) => (
     style={styles.gridList}
   >
     {
+    // <GridTile>
+    //   <img src="https://placehold.it/350x150/000000/ffffff?text=black" role="presentation" />
+    // </GridTile>
+    // <GridTile>
+    //   <img src="https://placehold.it/350x150/ffffff/000000?text=white" role="presentation" />
+    // </GridTile>
       blackwhite.map((tweetId) => {
         if (!tweetId) return <GridTile />;
 

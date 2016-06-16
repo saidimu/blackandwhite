@@ -31,7 +31,7 @@ const styles = {
     justifyContent: 'space-around',
   },
   loading: {
-    height: 200,
+    height: 250,
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
@@ -42,7 +42,7 @@ import { getArticles } from '../src/firebase.js';
 // import Article from './Article.js';
 import ArticlesGrid from '../components/ArticlesGrid.js';
 
-const NUM_ARTICLES = 150;
+const NUM_ARTICLES = 500;
 
 class App extends Component {
   constructor(props) {
@@ -78,7 +78,7 @@ class App extends Component {
       const articleKey = Object.keys(tweetIdArticles)[0];
       const article = tweetIdArticles[articleKey];
       const siteAlignment = article.site_alignment;
-      return siteAlignment[0].r2 >= 0.3;
+      return siteAlignment[0].r2 >= 0.4;
     });// black
 
     let white = Object.keys(articles).filter((tweetId) => {
@@ -88,11 +88,14 @@ class App extends Component {
       const articleKey = Object.keys(tweetIdArticles)[0];
       const article = tweetIdArticles[articleKey];
       const siteAlignment = article.site_alignment;
-      return siteAlignment[0].l2 >= 0.3;
+      return siteAlignment[0].l2 >= 0.7;
     });// white
 
     black.sort((a, b) => b - a);
+    black.splice(10);
+
     white.sort((a, b) => b - a);
+    white.splice(10);
 
     const blackwhite = flattenDeep(zip(black, white));
     this.setState({ articles, black, white, blackwhite });
@@ -127,6 +130,22 @@ class App extends Component {
     console.log(tweetId, articleKey, siteAlignment);
   }// _handleArticleGridTileClick
 
+  _renderPageHeader() {
+    return (
+      <AppBar
+        style={{
+          // position: 'fixed',
+          backgroundColor: 'transparent',
+        }}
+        showMenuIconButton={false}
+        title="black & white"
+        titleStyle={{
+        }}
+        zDepth={2}
+      />
+    );// return
+  }// _renderPageHeader
+
   render() {
     const { articles, blackwhite } = this.state;
     let Articles;
@@ -142,23 +161,7 @@ class App extends Component {
     return (
       <MuiThemeProvider muiTheme={muiTheme}>
         <div>
-          <AppBar
-            style={{
-              // position: 'fixed',
-            }}
-            title="get played"
-            zDepth={2}
-            iconElementLeft={
-              <IconButton iconClassName="material-icons">
-                play_circle_outline
-              </IconButton>
-            }
-            iconElementRight={
-              <IconButton iconClassName="material-icons">
-                more_vert
-              </IconButton>
-            }
-          />
+          {this._renderPageHeader()}
           {Articles}
         </div>
       </MuiThemeProvider>
