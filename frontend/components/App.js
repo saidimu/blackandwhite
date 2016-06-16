@@ -1,5 +1,7 @@
 import React, { Component } from 'react';
 
+const zip = require('lodash.zip');
+
 import AppBar from 'material-ui/AppBar';
 import {
   deepPurple500 as primary1Color,
@@ -39,7 +41,7 @@ import { getArticles } from '../src/firebase.js';
 // import Article from './Article.js';
 import ArticlesGrid from '../components/ArticlesGrid.js';
 
-const NUM_ARTICLES = 100;
+const NUM_ARTICLES = 10;
 
 class App extends Component {
   constructor(props) {
@@ -48,6 +50,7 @@ class App extends Component {
       articles: {},
       black: [],
       white: [],
+      blackwhite: [],
     };// state
 
     this._handleArticleGridTileClick = this._handleArticleGridTileClick.bind(this);
@@ -74,7 +77,7 @@ class App extends Component {
       const articleKey = Object.keys(tweetIdArticles)[0];
       const article = tweetIdArticles[articleKey];
       const siteAlignment = article.site_alignment;
-      return siteAlignment[0].r1 >= 0.5;
+      return siteAlignment[0].r1 >= 0.2;
     });// black
 
     let white = Object.keys(articles).filter((tweetId) => {
@@ -84,13 +87,14 @@ class App extends Component {
       const articleKey = Object.keys(tweetIdArticles)[0];
       const article = tweetIdArticles[articleKey];
       const siteAlignment = article.site_alignment;
-      return siteAlignment[0].l1 >= 0.5;
+      return siteAlignment[0].l1 >= 0.2;
     });// white
 
     black.sort((a, b) => b - a);
     white.sort((a, b) => b - a);
 
-    this.setState({ articles, black, white });
+    const blackwhite = zip(black, white);
+    this.setState({ articles, black, white, blackwhite });
   }// _sortArticlesIntoBlackAndWhite
 
   _renderLoadingIndicator() {
@@ -102,12 +106,13 @@ class App extends Component {
     );// return
   }// _renderLoadingIndicator
 
-  _renderArticles(articles) {
+  _renderArticles(articles, blackwhite) {
     // console.log(styles.articles);
     return (
       <div style={styles.articles}>
         <ArticlesGrid
           articles={articles}
+          blackwhite={blackwhite}
           onClickHandler={this._handleArticleGridTileClick}
         />
       </div>
@@ -122,14 +127,14 @@ class App extends Component {
   }// _handleArticleGridTileClick
 
   render() {
-    const { articles } = this.state;
+    const { articles, blackwhite } = this.state;
     let Articles;
 
     // Articles = this._renderLoadingIndicator();
     if (Object.keys(articles).length === 0) {
       Articles = this._renderLoadingIndicator();
     } else {
-      Articles = this._renderArticles(articles);
+      Articles = this._renderArticles(articles, blackwhite);
       // Articles = <ArticlesGrid articles={articles} />;
     }// if-else
 

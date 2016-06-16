@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "firebase": "^3.0.4",
+    "lodash.zip": "^4.0.0",
     "react": "^15.1.0",
     "react-dom": "^15.1.0",
     "react-tap-event-plugin": "^1.0.0"

@@ -13,40 +13,73 @@ const styles = {
   },
 };// styles
 
-const ArticlesGrid = ({ articles, onClickHandler }) => (
+const ArticlesGrid = ({ articles, blackwhite, onClickHandler }) => (
   <GridList
     cols={NUM_GRID_COLUMNS}
     cellHeight={200}
     style={styles.gridList}
   >
     {
-      Object.keys(articles).map((tweetId) => {
-        const tweetIdArticles = articles[tweetId];
+      blackwhite.map((blackwhiteTweetIdsList) => {
+        const blackTweetId = blackwhiteTweetIdsList[0];
+        const whiteTweetId = blackwhiteTweetIdsList[1];
 
-        // FIXME: TODO: BUG: are Articles in array identical??
-        const articleKey = Object.keys(tweetIdArticles)[0];
-        const article = tweetIdArticles[articleKey];
+        if (!blackTweetId) return <GridTile />;
+        if (!whiteTweetId) return <GridTile />;
 
-        if (!article.article) article.article = {}; // avoid undefined errors on article.article
+        const blackArticleKey = Object.keys(articles[blackTweetId]);
+        const blackArticle = articles[blackTweetId][blackArticleKey];
+        const whiteArticleKey = Object.keys(articles[whiteTweetId]);
+        const whiteArticle = articles[whiteTweetId][whiteArticleKey];
+
+        console.log(blackArticle);
+        console.log(whiteArticle);
+
+        // avoid undefined errors on article.article
+        if (!blackArticle.article) blackArticle.article = {};
+        if (!whiteArticle.article) whiteArticle.article = {};
 
         return (
-          <GridTile
-            key={articleKey}
-            title={article.article.title}
-            subtitle={article.article.source_url}
-            actionIcon={
-              <IconButton
-                touch={true}
-                iconStyle={{ color: 'white' }}
-                iconClassName="material-icons"
-              >
-                assignment_ind
-              </IconButton>
-            }
-            onTouchTap={() => onClickHandler(tweetId, articleKey, article.site_alignment)}
-          >
-            <img src={article.article.top_image} role="presentation" />
-          </GridTile>
+          <div>
+            <GridTile
+              key={blackArticleKey}
+              title={blackArticle.article.title}
+              subtitle={blackArticle.article.source_url}
+              actionIcon={
+                <IconButton
+                  touch={true}
+                  iconStyle={{ color: 'white' }}
+                  iconClassName="material-icons"
+                >
+                  assignment_ind
+                </IconButton>
+              }
+              onTouchTap={() => onClickHandler(
+                blackTweetId, blackArticleKey, blackArticle.site_alignment
+              )}
+            >
+              <img src={blackArticle.article.top_image} role="presentation" />
+            </GridTile>
+            <GridTile
+              key={whiteArticleKey}
+              title={whiteArticle.article.title}
+              subtitle={whiteArticle.article.source_url}
+              actionIcon={
+                <IconButton
+                  touch={true}
+                  iconStyle={{ color: 'white' }}
+                  iconClassName="material-icons"
+                >
+                  assignment_ind
+                </IconButton>
+              }
+              onTouchTap={() => onClickHandler(
+                whiteTweetId, whiteArticleKey, whiteArticle.site_alignment
+              )}
+            >
+              <img src={whiteArticle.article.top_image} role="presentation" />
+            </GridTile>
+          </div>
         );
       })// Object.keys(articles)
     }
@@ -57,6 +90,7 @@ const ArticlesGrid = ({ articles, onClickHandler }) => (
 
 ArticlesGrid.propTypes = {
   articles: PropTypes.object.isRequired,
+  blackwhite: PropTypes.array.isRequired,
   onClickHandler: PropTypes.func.isRequired,
 };// ArticlesGrid.propTypes
 
