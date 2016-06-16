@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 
 const zip = require('lodash.zip');
+const flattenDeep = require('lodash.flattendeep');
 
 import AppBar from 'material-ui/AppBar';
 import {
@@ -41,7 +42,7 @@ import { getArticles } from '../src/firebase.js';
 // import Article from './Article.js';
 import ArticlesGrid from '../components/ArticlesGrid.js';
 
-const NUM_ARTICLES = 10;
+const NUM_ARTICLES = 150;
 
 class App extends Component {
   constructor(props) {
@@ -77,7 +78,7 @@ class App extends Component {
       const articleKey = Object.keys(tweetIdArticles)[0];
       const article = tweetIdArticles[articleKey];
       const siteAlignment = article.site_alignment;
-      return siteAlignment[0].r1 >= 0.2;
+      return siteAlignment[0].r2 >= 0.3;
     });// black
 
     let white = Object.keys(articles).filter((tweetId) => {
@@ -87,13 +88,13 @@ class App extends Component {
       const articleKey = Object.keys(tweetIdArticles)[0];
       const article = tweetIdArticles[articleKey];
       const siteAlignment = article.site_alignment;
-      return siteAlignment[0].l1 >= 0.2;
+      return siteAlignment[0].l2 >= 0.3;
     });// white
 
     black.sort((a, b) => b - a);
     white.sort((a, b) => b - a);
 
-    const blackwhite = zip(black, white);
+    const blackwhite = flattenDeep(zip(black, white));
     this.setState({ articles, black, white, blackwhite });
   }// _sortArticlesIntoBlackAndWhite
 
