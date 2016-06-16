@@ -39,14 +39,15 @@ import { getArticles } from '../src/firebase.js';
 // import Article from './Article.js';
 import ArticlesGrid from '../components/ArticlesGrid.js';
 
-const NUM_ARTICLES = 25;
-const NUM_GRID_COLUMNS = 5;
+const NUM_ARTICLES = 100;
 
 class App extends Component {
   constructor(props) {
     super(props);
     this.state = {
       articles: {},
+      black: [],
+      white: [],
     };// state
 
     this._handleArticleGridTileClick = this._handleArticleGridTileClick.bind(this);
@@ -56,12 +57,41 @@ class App extends Component {
     getArticles(NUM_ARTICLES, (err, articles) => {
       // console.log(articles);
       if (!err) {
-        this.setState({ articles });
+        // this.setState({ articles });
+        this._sortArticlesIntoBlackAndWhite(articles);
       } else {
         console.error(err);
       }// if-else
     });// getArticles
   }// componentWillMount
+
+  _sortArticlesIntoBlackAndWhite(articles) {
+    // const { articles } = this.state;
+    let black = Object.keys(articles).filter((tweetId) => {
+      const tweetIdArticles = articles[tweetId];
+
+      // FIXME: TODO: BUG: are Articles in array identical??
+      const articleKey = Object.keys(tweetIdArticles)[0];
+      const article = tweetIdArticles[articleKey];
+      const siteAlignment = article.site_alignment;
+      return siteAlignment[0].r1 >= 0.5;
+    });// black
+
+    let white = Object.keys(articles).filter((tweetId) => {
+      const tweetIdArticles = articles[tweetId];
+
+      // FIXME: TODO: BUG: are Articles in array identical??
+      const articleKey = Object.keys(tweetIdArticles)[0];
+      const article = tweetIdArticles[articleKey];
+      const siteAlignment = article.site_alignment;
+      return siteAlignment[0].l1 >= 0.5;
+    });// white
+
+    black.sort((a, b) => b - a);
+    white.sort((a, b) => b - a);
+
+    this.setState({ articles, black, white });
+  }// _sortArticlesIntoBlackAndWhite
 
   _renderLoadingIndicator() {
     // console.log(styles.loading);
@@ -78,7 +108,6 @@ class App extends Component {
       <div style={styles.articles}>
         <ArticlesGrid
           articles={articles}
-          gridColumns={NUM_GRID_COLUMNS}
           onClickHandler={this._handleArticleGridTileClick}
         />
       </div>

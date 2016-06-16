@@ -2,18 +2,20 @@ import React, { PropTypes } from 'react';
 import { GridList, GridTile } from 'material-ui/GridList';
 import IconButton from 'material-ui/IconButton';
 
+const NUM_GRID_COLUMNS = 2;
+
 const styles = {
   gridList: {
-    // width: 800,
+    width: 800,
     // height: 500,
     overflowY: 'auto',
     marginBottom: 24,
   },
 };// styles
 
-const ArticlesGrid = ({ articles, gridColumns, onClickHandler }) => (
+const ArticlesGrid = ({ articles, onClickHandler }) => (
   <GridList
-    cols={gridColumns}
+    cols={NUM_GRID_COLUMNS}
     cellHeight={200}
     style={styles.gridList}
   >
@@ -24,7 +26,9 @@ const ArticlesGrid = ({ articles, gridColumns, onClickHandler }) => (
         // FIXME: TODO: BUG: are Articles in array identical??
         const articleKey = Object.keys(tweetIdArticles)[0];
         const article = tweetIdArticles[articleKey];
-        // console.log(article);
+
+        if (!article.article) article.article = {}; // avoid undefined errors on article.article
+
         return (
           <GridTile
             key={articleKey}
@@ -53,7 +57,6 @@ const ArticlesGrid = ({ articles, gridColumns, onClickHandler }) => (
 
 ArticlesGrid.propTypes = {
   articles: PropTypes.object.isRequired,
-  gridColumns: PropTypes.number.isRequired,
   onClickHandler: PropTypes.func.isRequired,
 };// ArticlesGrid.propTypes
 

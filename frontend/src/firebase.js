@@ -14,7 +14,7 @@ export function getArticles(maxItems, callback) {
   // Articles.orderByChild('expanded_url').limitToLast(limit).on('value', (dataSnapshot) => {
   Articles.orderByKey().limitToLast(limit).on('value', (dataSnapshot) => {
     const articles = dataSnapshot.val();
-    console.log(articles);
+    // console.log(articles);
     callback(null, articles);
   // }).catch((error) => {
   //   console.error(error);
