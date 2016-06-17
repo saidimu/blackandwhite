@@ -9,20 +9,21 @@ const shuffle = require('lodash.shuffle');
 const flattenDeep = require('lodash.flattendeep');
 
 import AppBar from 'material-ui/AppBar';
-import {
-  deepPurple500 as primary1Color,
-  deepPurple700 as primary2Color,
-  // red900 as veryConservativeColor,
-  // red400 as conservativeColor,
-  // blue900 as veryLiberalColor,
-  // blue400 as liberalColor,
-  // indigo600 as unaffiliatedColor,
-} from 'material-ui/styles/colors';
 import getMuiTheme from 'material-ui/styles/getMuiTheme';
 import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
 import CircularProgress from 'material-ui/CircularProgress';
 import Dialog from 'material-ui/Dialog';
-import FlatButton from 'material-ui/FlatButton';
+// import FlatButton from 'material-ui/FlatButton';
+import RaisedButton from 'material-ui/RaisedButton';
+import {
+  deepPurple500 as primary1Color,
+  deepPurple700 as primary2Color,
+  red500 as veryConservativeColor,
+  // red400 as conservativeColor,
+  blue500 as veryLiberalColor,
+  // blue400 as liberalColor,
+  lime500 as unaffiliatedColor,
+} from 'material-ui/styles/colors';
 
 // http://www.material-ui.com/#/customization/themes
 // https://github.com/callemall/material-ui/blob/master/src/styles/colors.js
@@ -48,15 +49,20 @@ const styles = {
     justifyContent: 'center',
   },
   dialog: {
-    // width: '100%',
-    maxWidth: 600,
+    width: '90%',
+    maxWidth: 450,
+  },
+  pieChart: {
+    labels: {
+      fontSize: 20,
+    },
   },
 };// styles
 
 import { getArticles } from '../src/firebase.js';
 import ArticlesGrid from '../components/ArticlesGrid.js';
 
-const NUM_FIREBASE_ARTICLES = 350;
+const NUM_FIREBASE_ARTICLES = 50;
 const NUM_DISPLAY_ARTICLES = 20;
 
 const ARTICLE_THRESHOLDS = {
@@ -179,13 +185,17 @@ class App extends Component {
       <div>
         <VictoryPie
           data={chartData}
-          // colorScale={[
-          //   '#D85F49',
-          //   '#F66D3B',
-          //   '#D92E1D',
-          //   '#D73C4C',
-          //   '#FFAF59',
-          // ]}
+          colorScale={[
+            veryConservativeColor,
+            unaffiliatedColor,
+            veryLiberalColor,
+            // '#D85F49',
+            // '#F66D3B',
+            // '#D92E1D',
+            // '#D73C4C',
+            // '#FFAF59',
+          ]}
+          style={styles.pieChart}
         />
       </div>
     );// return
@@ -195,27 +205,41 @@ class App extends Component {
     const { article } = this.state;
 
     const actions = [
-      <FlatButton
+      <RaisedButton
         label="Close"
-        primary={true}
+        primary={false}
         onTouchTap={() => this.setState({ showDialog: !this.state.showDialog })}
       />,
     ];
 
+    // bump up super low numbers for legibility purposes in UI
+    function fuzzAlignment(number, threshold) {
+      // return number > threshold ? number : threshold;
+      return number;
+    }// fuzzAlignment
+
     const siteData = article.siteAlignment[0];
     const chartData = [
-      { x: 'CONSERVATIVE', y: siteData.r1 },
-      { x: 'VERY CONSERVATIVE', y: siteData.r2 },
-      { x: 'UNAFFILIATED', y: siteData.n },
-      { x: 'LIBERAL', y: siteData.l1 },
-      { x: 'VERY LIBERAL', y: siteData.l2 },
+      { x: 'CONSERVATIVE', y: fuzzAlignment(siteData.r1 + siteData.r1, 0.05) },
+      { x: 'UNAFFILIATED', y: fuzzAlignment(siteData.n, 0.05) },
+      { x: 'LIBERAL', y: fuzzAlignment(siteData.l1 + siteData.l2, 0.05) },
     ];// pieData
 
     function getSiteTitle() {
       return (
         <div>
-          <img src={`http://www.google.com/s2/favicons?domain=${siteData.domain}`} role="presentation" />
-          {` ${siteData.domain}`}
+          <RaisedButton
+            label={siteData.domain}
+            linkButton={true}
+            href={article.canonical_link}
+            primary={false}
+            fullWidth={false}
+            style={{
+              paddingLeft: 10,
+            }}
+          >
+            <img src={`http://www.google.com/s2/favicons?domain=${siteData.domain}`} role="presentation" />
+          </RaisedButton>
         </div>
       );// return
     }// getSiteTitle
