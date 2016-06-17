@@ -6,13 +6,16 @@ const NUM_GRID_COLUMNS = 2;
 
 const styles = {
   gridList: {
-    width: 900,
+    width: 1200,
     // height: 500,
     // overflowY: 'auto',
     marginBottom: 24,
   },
   gridTile: {
-    margin: 50,
+    marginTop: 25,
+    marginRight: 25,
+    marginLeft: 25,
+    // marginBottom: 50,
   },
   gridTileHeader: {
     margin: 0,
@@ -22,7 +25,8 @@ const styles = {
 const ArticlesGrid = ({ articles, blackwhite, onClickHandler }) => (
   <GridList
     cols={NUM_GRID_COLUMNS}
-    cellHeight={200}
+    cellHeight={300}
+    padding={25}
     style={styles.gridList}
   >
     {
@@ -45,6 +49,7 @@ const ArticlesGrid = ({ articles, blackwhite, onClickHandler }) => (
           <GridTile
             key={articleKey}
             title={article.article.title}
+            titleBackground="rgba(0, 0, 0, 1)"
             subtitle={article.article.source_url}
             actionIcon={
               <IconButton

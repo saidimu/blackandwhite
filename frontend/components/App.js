@@ -1,17 +1,28 @@
 import React, { Component } from 'react';
 
+import {
+  VictoryPie,
+} from 'victory';
+
 const zip = require('lodash.zip');
+const shuffle = require('lodash.shuffle');
 const flattenDeep = require('lodash.flattendeep');
 
 import AppBar from 'material-ui/AppBar';
 import {
   deepPurple500 as primary1Color,
   deepPurple700 as primary2Color,
+  // red900 as veryConservativeColor,
+  // red400 as conservativeColor,
+  // blue900 as veryLiberalColor,
+  // blue400 as liberalColor,
+  // indigo600 as unaffiliatedColor,
 } from 'material-ui/styles/colors';
 import getMuiTheme from 'material-ui/styles/getMuiTheme';
 import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
-import IconButton from 'material-ui/IconButton';
 import CircularProgress from 'material-ui/CircularProgress';
+import Dialog from 'material-ui/Dialog';
+import FlatButton from 'material-ui/FlatButton';
 
 // http://www.material-ui.com/#/customization/themes
 // https://github.com/callemall/material-ui/blob/master/src/styles/colors.js
@@ -36,29 +47,40 @@ const styles = {
     alignItems: 'center',
     justifyContent: 'center',
   },
+  dialog: {
+    // width: '100%',
+    maxWidth: 600,
+  },
 };// styles
 
 import { getArticles } from '../src/firebase.js';
-// import Article from './Article.js';
 import ArticlesGrid from '../components/ArticlesGrid.js';
 
-const NUM_ARTICLES = 500;
+const NUM_FIREBASE_ARTICLES = 350;
+const NUM_DISPLAY_ARTICLES = 20;
+
+const ARTICLE_THRESHOLDS = {
+  VERY_CONSERVATIVE: 0.15,
+  VERY_LIBERAL: 0.3,
+};// ARTICLE_THRESHOLDS
 
 class App extends Component {
   constructor(props) {
     super(props);
     this.state = {
       articles: {},
-      black: [],
-      white: [],
+      // black: [],
+      // white: [],
       blackwhite: [],
+      article: {},
+      showDialog: false,
     };// state
 
     this._handleArticleGridTileClick = this._handleArticleGridTileClick.bind(this);
   }// constructor
 
   componentWillMount() {
-    getArticles(NUM_ARTICLES, (err, articles) => {
+    getArticles(NUM_FIREBASE_ARTICLES, (err, articles) => {
       // console.log(articles);
       if (!err) {
         // this.setState({ articles });
@@ -78,7 +100,7 @@ class App extends Component {
       const articleKey = Object.keys(tweetIdArticles)[0];
       const article = tweetIdArticles[articleKey];
       const siteAlignment = article.site_alignment;
-      return siteAlignment[0].r2 >= 0.4;
+      return siteAlignment[0].r2 >= ARTICLE_THRESHOLDS.VERY_CONSERVATIVE;
     });// black
 
     let white = Object.keys(articles).filter((tweetId) => {
@@ -88,17 +110,20 @@ class App extends Component {
       const articleKey = Object.keys(tweetIdArticles)[0];
       const article = tweetIdArticles[articleKey];
       const siteAlignment = article.site_alignment;
-      return siteAlignment[0].l2 >= 0.7;
+      return siteAlignment[0].l2 >= ARTICLE_THRESHOLDS.VERY_LIBERAL;
     });// white
 
-    black.sort((a, b) => b - a);
-    black.splice(10);
+    // black.sort((a, b) => b - a);
+    black = shuffle(black);
+    black.splice(NUM_DISPLAY_ARTICLES);
 
-    white.sort((a, b) => b - a);
-    white.splice(10);
+    // white.sort((a, b) => b - a);
+    white = shuffle(white);
+    white.splice(NUM_DISPLAY_ARTICLES);
 
     const blackwhite = flattenDeep(zip(black, white));
-    this.setState({ articles, black, white, blackwhite });
+    // this.setState({ articles, black, white, blackwhite });
+    this.setState({ articles, blackwhite });
   }// _sortArticlesIntoBlackAndWhite
 
   _renderLoadingIndicator() {
@@ -124,10 +149,13 @@ class App extends Component {
   }// _renderArticles
 
   _handleArticleGridTileClick(tweetId, articleKey, siteAlignment) {
-    // const { articles } = this.state;
-    // const article = articles[tweetId][articleKey];
+    const { articles } = this.state;
+    const article = articles[tweetId][articleKey].article || {};
 
-    console.log(tweetId, articleKey, siteAlignment);
+    console.log(tweetId, articleKey, article, siteAlignment);
+
+    article.siteAlignment = siteAlignment;
+    this.setState({ showDialog: true, article });
   }// _handleArticleGridTileClick
 
   _renderPageHeader() {
@@ -146,9 +174,75 @@ class App extends Component {
     );// return
   }// _renderPageHeader
 
+  _renderChart(chartData) {
+    return (
+      <div>
+        <VictoryPie
+          data={chartData}
+          // colorScale={[
+          //   '#D85F49',
+          //   '#F66D3B',
+          //   '#D92E1D',
+          //   '#D73C4C',
+          //   '#FFAF59',
+          // ]}
+        />
+      </div>
+    );// return
+  }
+
+  _renderDialog() {
+    const { article } = this.state;
+
+    const actions = [
+      <FlatButton
+        label="Close"
+        primary={true}
+        onTouchTap={() => this.setState({ showDialog: !this.state.showDialog })}
+      />,
+    ];
+
+    const siteData = article.siteAlignment[0];
+    const chartData = [
+      { x: 'CONSERVATIVE', y: siteData.r1 },
+      { x: 'VERY CONSERVATIVE', y: siteData.r2 },
+      { x: 'UNAFFILIATED', y: siteData.n },
+      { x: 'LIBERAL', y: siteData.l1 },
+      { x: 'VERY LIBERAL', y: siteData.l2 },
+    ];// pieData
+
+    function getSiteTitle() {
+      return (
+        <div>
+          <img src={`http://www.google.com/s2/favicons?domain=${siteData.domain}`} role="presentation" />
+          {` ${siteData.domain}`}
+        </div>
+      );// return
+    }// getSiteTitle
+
+    return (
+      <div>
+        <Dialog
+          title={getSiteTitle()}
+          actions={actions}
+          modal={false}
+          autoScrollBodyContent={true}
+          contentStyle={styles.dialog}
+          open={this.state.showDialog}
+          onRequestClose={() => this.setState({ showDialog: !this.state.showDialog })}
+        >
+          {
+            this._renderChart(chartData)
+          }
+        </Dialog>
+      </div>
+    );// return
+  }// _renderDialog
+
   render() {
-    const { articles, blackwhite } = this.state;
+    const { articles, blackwhite, showDialog } = this.state;
     let Articles;
+    let ArticleSummary;
 
     // Articles = this._renderLoadingIndicator();
     if (Object.keys(articles).length === 0) {
@@ -158,9 +252,14 @@ class App extends Component {
       // Articles = <ArticlesGrid articles={articles} />;
     }// if-else
 
+    if (showDialog) {
+      ArticleSummary = this._renderDialog();
+    }// if
+
     return (
       <MuiThemeProvider muiTheme={muiTheme}>
         <div>
+          {ArticleSummary}
           {this._renderPageHeader()}
           {Articles}
         </div>

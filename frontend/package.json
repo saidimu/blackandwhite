@@ -13,10 +13,12 @@
   "dependencies": {
     "firebase": "^3.0.4",
     "lodash.flattendeep": "^4.2.0",
+    "lodash.shuffle": "^4.0.0",
     "lodash.zip": "^4.0.0",
     "react": "^15.1.0",
     "react-dom": "^15.1.0",
-    "react-tap-event-plugin": "^1.0.0"
+    "react-tap-event-plugin": "^1.0.0",
+    "victory": "^0.8.0"
   },
   "author": "said apale <saidimu@gmail.com>",
   "license": "ISC",
