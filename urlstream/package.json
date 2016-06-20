@@ -11,7 +11,7 @@
     "save_urls": "npm run build && node dist/save_urls.js",
     "process_articles": "npm run build && node dist/process_articles.js",
     "save_articles": "npm run build && node dist/save_articles.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "mocha --compilers js:babel-core/register"
   },
   "author": "said apale <saidimu@gmail.com>",
   "license": "ISC",
@@ -35,8 +35,11 @@
     "twit": "^2.2.4"
   },
   "devDependencies": {
+    "babel-core": "^6.9.1",
+    "chai": "^3.5.0",
     "eslint": "^2.12.0",
     "eslint-config-airbnb-base": "^3.0.1",
-    "eslint-plugin-import": "^1.8.1"
+    "eslint-plugin-import": "^1.8.1",
+    "sinon": "^1.17.4"
   }
 }

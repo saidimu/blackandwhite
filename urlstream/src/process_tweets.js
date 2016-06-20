@@ -11,6 +11,10 @@ import {
   publish as publish_message,
 } from './messaging.js';
 
+import {
+  get_urls,
+} from './tweets.js';
+
 export function process_tweets() {
   const topic = process.env.TWEETS_TOPIC;
   const channel = process.env.TWEETS_PROCESS_CHANNEL;
@@ -28,7 +32,9 @@ export function process_tweets() {
 
     log.debug({ tweet_id, tweet }, 'Tweet message object');
 
-    tweet.entities.urls.forEach((url) => {
+    const urls = get_urls(tweet);
+    // tweet.entities.urls.forEach((url) => {
+    urls.forEach((url) => {
       if (url) {
         log.info({ tweet_urls_topic, tweet_id, url }, 'Publishing urls in tweet');
         publish_message(tweet_urls_topic, {
