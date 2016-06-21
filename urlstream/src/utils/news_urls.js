@@ -15,8 +15,6 @@
 const filter = require('lodash.filter');
 const parseDomain = require('parse-domain');
 
-const top500_sites = require('./news_top500.json');
-
 /**
  * ... mapping the 500 most common ideological affiliations listed in individuals' profile
  * .. to a five-point {-2, -1, 0, 1, 2} numerical representation
@@ -42,7 +40,7 @@ function short_domain_to_long_domain(short_domain) {
   return long_domain || short_domain;
 }// short_domain_to_long_domain
 
-export function get_site_alignment(site_url) {
+export function get_site_alignment(site_url, top500) {
   if (!site_url) {
     return [];
   }// if
@@ -57,15 +55,33 @@ export function get_site_alignment(site_url) {
   // convert potentially short domain into long form (e.g. gu.com into theguardian.com)
   hostname = short_domain_to_long_domain(hostname);
 
-  const raw_alignment = filter(top500_sites, (site) => site.domain.includes(hostname));
+  const raw_alignment = filter(top500, (site) => site.domain.includes(hostname));
 
   return raw_alignment;
 }// get_site_alignment
 
-export function filter_site(site_url) {
-  if (get_site_alignment(site_url).length) {
-    return true;
+export function site_in_top500(site_url, top500) {
+  return (get_site_alignment(site_url, top500).length > 0);
+}// site_in_top500
+
+export function site_in_ignore_list(expanded_url, ignore_list) {
+  const { domain, tld } = parseDomain(expanded_url);
+  const link_hostname = `${domain}.${tld}`;
+  return ignore_list.includes(link_hostname);
+}// site_in_ignore_list
+
+export function process_url(expanded_url, ignore_list, top500) {
+  if (!ignore_list) {
+    throw new Error('"ignore_list" must be provided.');
   }// if
 
-  return false;
-}// filter_site
+  if (!top500) {
+    throw new Error('"top500" list must be provided.');
+  }// if
+
+  return (
+    !site_in_ignore_list(expanded_url, ignore_list)
+      &&
+    site_in_top500(expanded_url, top500)
+  );// return
+}// process_url

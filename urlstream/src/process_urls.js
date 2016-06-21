@@ -14,21 +14,23 @@ import {
 } from './messaging.js';
 
 const now = require('performance-now');
-const parseDomain = require('parse-domain');
 
 import {
   Articles,
 } from './datastore.js';
 
 import {
-  filter_site,
+  site_in_ignore_list,
+  process_url,
   get_site_alignment,
-} from './news.js';
+} from './utils/news_urls.js';
 
-const IGNORE_HOSTNAMES = process.env.IGNORE_HOSTNAMES.split(',') || [];
 const host = process.env.NEWSPAPER_PORT_8000_TCP_ADDR;
 const port = process.env.NEWSPAPER_PORT_8000_TCP_PORT;
 const NEWSPAPER_ENDPOINT = `http://${host}:${port}/article`;
+
+const IGNORE_HOSTNAMES = process.env.IGNORE_HOSTNAMES.split(',') || [];
+const top500_sites = require('./utils/news_top500.json');
 
 export function process_urls() {
   const topic = process.env.TWEET_URLS_TOPIC;
@@ -58,7 +60,12 @@ export function process_urls() {
       return;
     }// if
 
-    if (skip_url_processing(expanded_url)) {
+    if (site_in_ignore_list(expanded_url, IGNORE_HOSTNAMES)) {
+      stats.increment('get_article.warn.ignore_hostname');
+      log.warn({
+        expanded_url,
+        ignore_hostnames: IGNORE_HOSTNAMES,
+      }, 'Ignore link hostname b/c it is in list of IGNORED HOSTNAMES');
       return;
     }// if
 
@@ -101,7 +108,7 @@ export function process_urls() {
               stats.histogram('get_article.tweet_urls.process.then', duration);
 
               if (article) {
-                const site_alignment = get_site_alignment(expanded_url);
+                const site_alignment = get_site_alignment(expanded_url, top500_sites);
                 const article_message = { tweet_id, expanded_url, article, site_alignment };
 
                 log.info({
@@ -161,7 +168,11 @@ export function process_urls() {
 }// process_urls
 
 function get_article(expanded_url) {
-  if (skip_url_processing(expanded_url)) {
+  if (process_url(expanded_url, IGNORE_HOSTNAMES, top500_sites)) {
+    stats.increment('get_article.warn.not_top500');
+    log.warn({
+      expanded_url,
+    }, 'Ignore url b/c it is not in list of news domains to fetch articles from.');
     return null;
   }// if
 
@@ -177,34 +188,6 @@ function get_article(expanded_url) {
     return null;
   }// if-else
 }// get_article
-
-function skip_url_processing(expanded_url) {
-  const { domain, tld } = parseDomain(expanded_url);
-  const link_hostname = `${domain}.${tld}`;
-  log.info({ link_hostname });
-
-  if (IGNORE_HOSTNAMES.includes(link_hostname)) {
-    stats.increment('get_article.warn.ignore_hostname');
-    log.warn({
-      expanded_url,
-      link_hostname,
-      ignore_hostnames: IGNORE_HOSTNAMES,
-    }, 'Ignore link hostname b/c it is in list of IGNORED HOSTNAMES');
-    return true;
-  }// if
-
-  const site_allowed = filter_site(expanded_url);
-  if (!site_allowed) {
-    stats.increment('get_article.warn.not_top500');
-    log.warn({
-      expanded_url,
-      site_allowed,
-    }, 'Ignore url b/c it is not in list of news domains to fetch articles from.');
-    return true;
-  }// site_alignment
-
-  return false;
-}// skip_url_processing
 
 init_writer();
 process_urls();
