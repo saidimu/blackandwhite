@@ -1,17 +1,32 @@
+sudo: required
+
 language: node_js
+
 node_js:
   - "6"
+
+services:
+  - docker
+
 branches:
   only:
     - master
     - dev
+
 env:
   - CXX=g++-4.8
+
+before_install: cd urlstream
+
+script: npm test
+after_script:
+  - docker build -t saidimu/blackandwhite:urlstream .
+  - docker login -e="$DOCKER_EMAIL" -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD"
+  - docker push saidimu/blackandwhite:urlstream
+
 addons:
   apt:
     sources:
       - ubuntu-toolchain-r-test
     packages:
       - g++-4.8
-before_install: cd urlstream
-script: npm test
