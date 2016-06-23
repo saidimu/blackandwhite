@@ -1,4 +1,4 @@
-## `black & white`
+## `black & white` [![Build Status](https://travis-ci.org/saidimu/blackandwhite.svg?branch=dev)](https://travis-ci.org/saidimu/blackandwhite)
 
 In the wake of Facebook's news feed [controversy](http://www.wsj.com/articles/five-things-to-know-about-facebooks-trending-controversy-1462915385), The Wall Street Journal created `Blue Feed, Red Feed`:
 
