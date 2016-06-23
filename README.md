@@ -9,9 +9,9 @@ In the wake of Facebook's news feed [controversy](http://www.wsj.com/articles/fi
 ## Monorepo Organization
 There are 3 main parts to the project, each in its own subfolder:
 
- - a [ReactJS frontend](https://github.com/saidimu/blackandwhite/tree/dev/frontend)
- - a [NodeJS backend](https://github.com/saidimu/blackandwhite/tree/dev/urlstream)
- - a [Python backend](https://github.com/saidimu/blackandwhite/tree/dev/newspaper)
+ - a [ReactJS frontend](#reactjs-frontend)
+ - a [NodeJS backend](#nodejs-backend)
+ - a [Python backend](#python-backend)
 
 ### ReactJS frontend
 This is what is live at https://newscuria.firebaseapp.com/
