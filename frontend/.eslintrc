@@ -1,0 +1,12 @@
+{
+  "extends": "airbnb",
+  "rules":  {
+    "react/prefer-stateless-function": 0,
+    "no-console": 0,
+    "no-iterator": 0,
+    "no-restricted-syntax": [1, "ForInStatement"],
+    "react/jsx-boolean-value": 0,
+    "react/jsx-no-bind": 0,
+    "no-underscore-dangle": ["error", { "allowAfterThis": true }]
+  }
+}
