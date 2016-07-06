@@ -14,6 +14,7 @@ import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
 import CircularProgress from 'material-ui/CircularProgress';
 import Dialog from 'material-ui/Dialog';
 // import FlatButton from 'material-ui/FlatButton';
+import IconButton from 'material-ui/IconButton';
 import RaisedButton from 'material-ui/RaisedButton';
 import {
   deepPurple500 as primary1Color,
@@ -62,11 +63,11 @@ const styles = {
 import { getArticles } from '../src/firebase.js';
 import ArticlesGrid from '../components/ArticlesGrid.js';
 
-const NUM_FIREBASE_ARTICLES = 50;
-const NUM_DISPLAY_ARTICLES = 20;
+const NUM_FIREBASE_ARTICLES = 500;
+const NUM_DISPLAY_ARTICLES = 5;
 
 const ARTICLE_THRESHOLDS = {
-  VERY_CONSERVATIVE: 0.15,
+  VERY_CONSERVATIVE: 0.3,
   VERY_LIBERAL: 0.3,
 };// ARTICLE_THRESHOLDS
 
@@ -171,7 +172,12 @@ class App extends Component {
           // position: 'fixed',
           backgroundColor: 'transparent',
         }}
-        showMenuIconButton={false}
+        showMenuIconButton={true}
+        iconElementLeft={
+          <IconButton iconClassName="material-icons" touch={true}>
+            whatshot
+          </IconButton>
+        }
         title="black & white"
         titleStyle={{
         }}
