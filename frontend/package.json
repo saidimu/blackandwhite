@@ -4,7 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev": "reactpack --dev src/index.js",
+    "predev": "npm run-script build",
+    "dev": "reactpack --dev --watch src/index.js",
     "build": "reactpack --optimize --clean --no-source-map --no-env src/index.js",
     "predeploy": "npm run-script build",
     "deploy": "firebase deploy",
