@@ -4,7 +4,7 @@ In the wake of Facebook's news feed [controversy](http://www.wsj.com/articles/fi
 
 > To demonstrate how reality may differ for different Facebook users, The Wall Street Journal created two feeds, one “blue” and the other “red.” If a source appears in the red feed, a majority of the articles shared from the source were classified as “very conservatively aligned” in a large 2015 Facebook study. For the blue feed, a majority of each source’s articles aligned “very liberal.” These aren't intended to resemble actual individual news feeds. Instead, they are rare side-by-side looks at real conversations from different perspectives.
 
-[`black & white`](https://newscuria.firebaseapp.com/) is a similar effort but targetting Twitter instead of Facebook news feeds.
+[`black & white`](https://newscuria.com/) is a similar effort but targetting Twitter instead of Facebook news feeds.
 
 ## Monorepo Organization
 There are 3 main parts to the project, each in its own subfolder:
@@ -14,7 +14,7 @@ There are 3 main parts to the project, each in its own subfolder:
  - a [Python backend](#python-backend)
 
 ### ReactJS frontend
-This is what is live at https://newscuria.firebaseapp.com/
+This is what is live at https://newscuria.com/
 
 The [`reactpack`](https://github.com/olahol/reactpack)-based app loads data from a Firebase database and displays a side-by-side `black & white` grid of conservative and liberal news.
 
